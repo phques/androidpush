@@ -1,0 +1,14 @@
+# depslib dependency file v1.0
+1343278989 source:/home/kwez/code/fileClient/main.d
+	<std/stdio.d>
+	<std/conv.d>
+	<std/socket.d>
+
+1343283706 source:/home/kwez/code/fileClient/mainFileClient.d
+	<std/stdio.d>
+	<std/conv.d>
+	<std/socket.d>
+	<std/socketstream.d>
+	<std/stream.d>
+	<std/algorithm.d>
+
