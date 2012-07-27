@@ -12,3 +12,19 @@
 	<std/stream.d>
 	<std/algorithm.d>
 
+1343362589 source:/home/kwez/code/fileServer/fileClient/mainFileClient.d
+	<std/stdio.d>
+	<std/conv.d>
+	<std/socket.d>
+	<std/socketstream.d>
+	<std/stream.d>
+	<std/algorithm.d>
+
+1343366140 source:/home/kwez/code/fileServer/fileClient/mainFileClient2.d
+	<std/stdio.d>
+	<std/conv.d>
+	<std/socket.d>
+	<std/socketstream.d>
+	<std/stream.d>
+	<std/algorithm.d>
+
