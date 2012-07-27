@@ -11,7 +11,7 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="dmd" />
-				<Option parameters="bigfile.tar.gz_ 8888" />
+				<Option parameters="4445" />
 				<Compiler>
 					<Add option="-g" />
 					<Add option="-debug" />
@@ -27,7 +27,11 @@
 				</Compiler>
 			</Target>
 		</Build>
-		<Unit filename="mainFileServer.d" />
+		<Unit filename="mainFileServer.d">
+			<Option compile="0" />
+			<Option link="0" />
+		</Unit>
+		<Unit filename="mainFileServer2.d" />
 		<Extensions>
 			<code_completion />
 			<debugger />
