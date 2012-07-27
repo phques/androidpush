@@ -3,5 +3,7 @@
 	<Workspace title="socketFileServer">
 		<Project filename="fileServer/fileServer.cbp" />
 		<Project filename="fileClient/fileClient.cbp" />
+		<Project filename="fileClientC/fileClientC.cbp" />
+		<Project filename="fileServerC/fileServerC.cbp" />
 	</Workspace>
 </CodeBlocks_workspace_file>
