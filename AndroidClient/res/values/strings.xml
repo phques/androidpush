@@ -1,0 +1,10 @@
+<resources>
+
+    <string name="app_name">AndroidClient</string>
+    <string name="hello">Hello world!</string>
+    <string name="menu_settings">Settings</string>
+    <string name="title_activity_android_client">AndroidClient</string>
+    <string name="button">Go!</string>
+    <string name="edit_message"/>
+
+</resources>
