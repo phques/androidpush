@@ -1,19 +1,17 @@
 package com.exercise.AndroidClient;
 
-//import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
-import java.net.UnknownHostException;
 
 import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONTokener;
 
 import android.app.Activity;
+import android.app.DownloadManager;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
@@ -26,30 +24,11 @@ public class AndroidClient extends Activity {
 
 	EditText textOut;
 	TextView textIn;
-	DownloadWebpageText downloader = null;
-	DatagramSocket socket = null;
+	DownloadWebpageText downloader;
+	DownloadManager downloadMgr;
+	DatagramSocket socket;
 	int cptThread = 0;
 
-	class RecvFrom {
-
-		int port;
-		String destinationType;  
-		String subDir;  
-		String file;  
-		
-		RecvFrom(String json) throws JSONException {
-			parseJson(json);
-		}
-		
-		private void parseJson(String json) throws JSONException {			
-			JSONObject object = (JSONObject) new JSONTokener(json).nextValue();
-			port = object.getInt("recvFromPort");
-			file = object.getString("file");  
-			subDir = object.getString("subDir");  
-			destinationType = object.getString("destinationType");  
-		}
-		
-	}
 	
 	/** Called when the activity is first created. */
 	@Override
@@ -62,6 +41,8 @@ public class AndroidClient extends Activity {
 		
 		Button buttonSend = (Button)findViewById(R.id.send);
 		buttonSend.setOnClickListener(buttonSendOnClickListener);
+		
+		downloadMgr = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
 	}
 
 
@@ -71,7 +52,6 @@ public class AndroidClient extends Activity {
 			if (socket != null) {
 				if (downloader == null) {
 					textOut.setText("waiting ...");
-					//						new DownloadWebpageText().execute();
 					downloader = new DownloadWebpageText(); 
 					downloader.execute();
 				}
@@ -90,6 +70,7 @@ public class AndroidClient extends Activity {
 		super.onStart();  // Always call the superclass method first
 
 		try {
+			// open a udp socket to receive commands
 			socket = new DatagramSocket(null);	// unbound..
 			socket.setReuseAddress(true);		// .. and reuse ! (so we can restart while debugging)
 			socket.bind(new InetSocketAddress(4445)); // void return ! cant check if worked !!!
@@ -136,76 +117,51 @@ public class AndroidClient extends Activity {
 	/*-----------------------------------------*/
 	
 	
-	private class DownloadWebpageText extends AsyncTask<Void, Void, String> {
+	private class DownloadWebpageText extends AsyncTask<Void, Void, RecvFrom> {
 
 		//@Override
-		protected String doInBackground(Void ... voids) {
+		protected RecvFrom doInBackground(Void ... voids) {
 
-			String result=null;
-//			Socket socket = null;
-//			BufferedReader in = null;
-			
+			RecvFrom recvFrom = null;
 			try {
+				// Wait for a datagram to come in
 				byte[] buf = new byte[1024*4];
 				DatagramPacket packet = new DatagramPacket(buf, buf.length);
 				socket.receive(packet);
 
+				// Create a RecvFrom with the received data
 				String json = new String(packet.getData(), 0, packet.getLength());
-				RecvFrom recvFrom = new RecvFrom(json);
+				String remoteHost = packet.getAddress().toString();
 				
-				InetAddress addr = packet.getAddress();
-				result = "received " + json + "\nfrom : " + addr.toString();
+				recvFrom = new RecvFrom(downloadMgr, json, remoteHost);
 				
-				/*
-				socket = new Socket();
-				socket.connect(new InetSocketAddress("192.168.1.119", 8888), 0);
-				
-				in = new BufferedReader(new InputStreamReader(socket.getInputStream()));				
-				result = in.readLine();
-				*/
-			/*} catch (UnknownHostException e) {
+				recvFrom.execute();
+							
+			} catch (IOException e) {
 				e.printStackTrace();
-				result = e.getMessage();
-			*/} catch (IOException e) {
+				recvFrom = new RecvFrom(e.getMessage());
+			} catch (JSONException e) {
 				e.printStackTrace();
-				result = e.getMessage();
-			} /*catch (Exception e) {
-				e.printStackTrace();
-				result = e.getMessage();
-			}*/ catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				result = e.getMessage();
+				recvFrom = new RecvFrom(e.getMessage());
 			}
-			/*finally{
-				if (socket != null){
-					socket.close();
 
-					try {
-						socket.close();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-				
-				if (in != null){
-					try {
-						in.close();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-			}*/
-			return result;
+			return recvFrom;
 		}
 		
 
 		// onPostExecute displays the results of the AsyncTask.
 		//@Override
-		protected void onPostExecute(String result) {
-			if (result != null)
-				textOut.setText(result);
+		protected void onPostExecute(RecvFrom recvFrom) {
+			if (recvFrom != null && !isCancelled()) {
+				String text = recvFrom.errMessage;
+				
+				if (text == null)
+					text = "received " + recvFrom.json + "\nfrom : " + recvFrom.remoteHost;
+				
+				textOut.setText(text);
+			}
 			
+			// we're done, clear out the ref to us in the parent class
 			downloader = null;
 		}
 	}	    
