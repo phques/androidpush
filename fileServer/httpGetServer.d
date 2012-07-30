@@ -1,3 +1,4 @@
+
 module main;
 
 import std.stdio;
@@ -7,12 +8,13 @@ import std.string;
 import std.conv;
 import std.stream;
 import std.socket;
+import std.socketstream;
 
 int main(string[] args)
 {
 
     string filename;
-    ushort port = 8888; // default
+    ushort port = 80; // default
 
     // get filename to send param
     if (args.length < 2)
@@ -39,29 +41,53 @@ int main(string[] args)
         assert(listener.isAlive);
         scope(exit) listener.close();
 
+        listener.setOption(SocketOptionLevel.SOCKET, SocketOption.REUSEADDR, true);
+
         listener.bind(new InternetAddress(port));
         listener.listen(1);
         writefln("Listening on port %d. file %s", port, filename);
 
         // accept/waitfor client connection
-        Socket sn = listener.accept();
-        scope(exit) {
-            sn.shutdown(SocketShutdown.BOTH);
-            sn.close();
-        }
+        Socket socket = listener.accept();
+//        scope(exit) {
+//            socket.shutdown(SocketShutdown.BOTH);
+//            socket.close();
+//        }
 
-        writefln("Connection from %s established.", sn.remoteAddress().toString());
-        assert(sn.isAlive);
+        writefln("Connection from %s established.", socket.remoteAddress().toString());
+        assert(socket.isAlive);
         assert(listener.isAlive);
 
-        // send the filename
-        sn.send(format("filename:%s\n", baseName(filename)));
-version(none) {
+        // ##TODO we should interpret the GET http command !!
+
+        SocketStream stream = new SocketStream(socket, FileMode.In);
+
+         foreach(ulong n, char[] line; stream)
+         {
+             writefln("line : %s", line);
+             if (line == "") // end of headers
+                break;
+         }
+
+
         // open the file to send
         BufferedFile file = new BufferedFile();
         file.open(filename);
         scope(exit) file.close();
 
+        // send back headers
+        debug writeln("Content-Length: " ~ to!string(file.size) ~ "\n");
+
+        socket.send("HTTP/1.0 200 OK\n");
+        socket.send("Server: kwezMiniHttp\n");
+        socket.send("Connection: close\n");
+//        socket.send("Content-type: application/octet-stream\n");
+        socket.send("Content-type: image/jpeg\n");
+        socket.send("Content-Length: " ~ to!string(file.size) ~ "\n");
+        socket.send("\n");
+
+
+version(all) {
         // send the file
         byte[] buffer = new byte[1024*16];
         size_t nbReadBytes;
@@ -71,15 +97,23 @@ version(none) {
             // read block from file
             nbReadBytes = file.readBlock(buffer.ptr, 1024*16);
             // send the data to the client socket
-            sn.send(buffer[0..nbReadBytes]);
+            socket.send(buffer[0..nbReadBytes]);
 
             // output nb bytes total
             total += nbReadBytes;
             writef("%s\r", total);
 
         } while (nbReadBytes > 0);
-}
+
         writeln("");
+}
+        foreach(ulong n, char[] line; stream)
+         {
+             writefln("line : %s", line);
+//             if (line == "") // end of headers
+//                break;
+         }
+
 
     }
     catch (SocketException ex)

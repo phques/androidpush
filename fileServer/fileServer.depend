@@ -12,3 +12,31 @@
 	<std/stream.d>
 	<std/socket.d>
 
+1343364283 source:/home/kwez/code/fileServer/fileServer/mainFileServer.d
+	<std/stdio.d>
+	<std/file.d>
+	<std/path.d>
+	<std/string.d>
+	<std/conv.d>
+	<std/stream.d>
+	<std/socket.d>
+
+1343606301 source:/home/kwez/code/fileServer/fileServer/mainFileServer2.d
+	<std/stdio.d>
+	<std/conv.d>
+	<std/socket.d>
+	<std/socketstream.d>
+	<std/stream.d>
+	<std/algorithm.d>
+	<std/json.d>
+	<std/string.d>
+
+1343589700 source:/home/kwez/code/fileServer/fileServer/httpGetServer.d
+	<std/stdio.d>
+	<std/file.d>
+	<std/path.d>
+	<std/string.d>
+	<std/conv.d>
+	<std/stream.d>
+	<std/socket.d>
+

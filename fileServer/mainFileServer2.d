@@ -6,10 +6,35 @@ import std.socket;
 import std.socketstream;
 import std.stream;
 import std.algorithm;
+import std.json;
+import std.string;
+
+
+string makeJson(ushort port, string dest, string subdir, string file)
+{
+    string jsonString =
+    `{
+        "recvFromPort" : %s,
+        "destinationType" : "%s",
+        "subDir" : "%s",
+        "file" : "%s"
+    }`.format(port, dest, subdir, file);
+
+    // make sure it parses ! (can throw exception
+    JSONValue val = parseJSON(jsonString);
+
+    // and get back the actual 'official' JSON string ;-)
+    jsonString = toJSON(&val);
+    debug writeln(jsonString);
+
+    return jsonString;
+}
+
+
 
 int main(string[] args)
 {
-    ushort port = 4444;
+    ushort port = 4445;
 
     // get server socket port optional param
     if (args.length == 2)
@@ -23,10 +48,14 @@ int main(string[] args)
     version(all) {
         // no connect, broadcast, sendTo()
         socket.setOption(SocketOptionLevel.SOCKET, SocketOption.BROADCAST, true);
+//        auto remoteAddr = new InternetAddress("192.168.1.123", port);
         auto remoteAddr = new InternetAddress("192.168.1.255", port);
 
+        string msg = makeJson(port, "pictures", "", "uneimage.jpg");
+
         writefln("sending to %s", to!string(remoteAddr));
-        auto len = socket.sendTo("allo\n", remoteAddr);
+        auto len = socket.sendTo(msg, remoteAddr);
+
         if (len == 0 || len == Socket.ERROR)
             writefln("error sending datagram (%s)", len);
         else
@@ -51,7 +80,7 @@ int main(string[] args)
     }
     catch (Exception ex)
     {
-        writeln("Exception ", ex.msg);
+        writeln("k Exception ", ex.msg);
     }
 
 //    stdin.readln();
