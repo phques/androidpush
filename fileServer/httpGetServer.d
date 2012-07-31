@@ -9,123 +9,307 @@ import std.conv;
 import std.stream;
 import std.socket;
 import std.socketstream;
+import std.getopt;
+import std.json;
 
-int main(string[] args)
+
+class AndroidHttpPush
 {
-
-    string filename;
-    ushort port = 80; // default
-
-    // get filename to send param
-    if (args.length < 2)
+    this(string[] args)
     {
-        writeln("params: filename [port]");
-        return -1;
+        getopt(args,
+            "androidUdpPort", &androidUdpPort,
+            "localHttpPort", &localHttpPort,
+            "destDirType", &destDirType,
+            "destSubdir", &destSubdir,
+            "file", &filePath
+            );
+
+        if (filePath is null)
+            throw new Exception("missing filepath");
+
+        baseFilename = baseName(filePath);
+
+        if (!exists(filePath) || !isFile(filePath))
+            throw new Exception("'%s' is not a file", filePath);
+
+        if (args.length != 1)
+            throw new Exception("invalid argument");
     }
-    // also check that it is a valid file
-    filename = args[1];
-    if (!exists(filename) || !isFile(filename))
+
+    void showUsage()
     {
-        writefln("'%s' is not a file", filename);
-        return -1;
+        writeln("--androidUdpPort");
+        writeln("--localHttpPort");
+        writeln("--destDirType");
+        writeln("--destSubdir");
+        writeln("--file");
     }
 
-    // get optional listen port
-    if (args.length == 3)
-        port = to!ushort(args[2]);
-
-    try
+    void run()
     {
-        // open listen socket
+        try
+        {
+            enum NbRetries = 5;
+            bool ok = false;
+            for (auto retry=0; retry < NbRetries && !ok; retry++)
+            {
+                writeln("");
+                if (sendUdpPacket())
+                {
+                    // get 1st connection from android client
+                    // quick connect: android client app should connect & send ACK right away
+                    waitForAndroidClientSocket("ACK", 1);
+                    if (clientSocket !is null)
+                    {
+                        scope(exit) {
+                            clientSocket.shutdown(SocketShutdown.BOTH);
+                            clientSocket.close();
+                            clientSocket = null;
+                        }
+
+                        // check that we recvd a ACK from android client
+                        SocketStream stream = new SocketStream(clientSocket, FileMode.In);
+                        char[] ackLine = stream.readLine();
+                        stream.close();
+
+                        ok = ackLine == "ACK";
+                    }
+                }
+            }
+
+            if (ok)
+            {
+                // get connection to android client
+                writeln("");
+                prepareClientSocket();
+                if (clientSocket !is null)
+                {
+                    scope(exit) {
+                        clientSocket.shutdown(SocketShutdown.BOTH);
+                        clientSocket.close();
+                        clientSocket = null;
+                    }
+
+                    // send the file to client
+                    sendFile();
+                    writeln("succeeded in sending file ", baseFilename);
+                }
+            }
+            else
+            {
+                writeln("\n*** unable to connect with Android client");
+            }
+        }
+        catch (SocketException ex)
+        {
+            writeln("SocketException ", ex.msg);
+        }
+        catch (Exception ex)
+        {
+            writeln("Exception ", ex.msg);
+        }
+    }
+
+private:
+    ushort androidUdpPort = 4445;
+    ushort localHttpPort = 8080; // 80 not allowed on my ubuntu ;-p
+    string destDirType = "downloads";
+    string destSubdir = "";
+    string filePath;
+    string baseFilename;
+
+    Socket clientSocket;
+
+    // create a JSON 'recFrom' object string
+    string makeRecvFromJson(ushort localPort, string destDirType, string subdir, string file)
+    {
+        string jsonString =
+        `{
+            "recvFromPort" : %s,
+            "destDirType" : "%s",
+            "subDir" : "%s",
+            "file" : "%s"
+        }`.format(localPort, destDirType, subdir, file);
+
+        // make sure it parses ! (can throw exception)
+        // and get back the actual 'official' JSON string ;-)
+        JSONValue val = parseJSON(jsonString);
+        jsonString = toJSON(&val);
+
+        return jsonString;
+    }
+
+    // send a 'recvFrom' command as a broadcast udp datagram to android client,
+    // when it recvs it it then connects to us to get the file (HTTP GET)
+    // ## Throws
+    bool sendUdpPacket()
+    {
+        // open a broadcast udp udpSocket
+        Socket udpSocket = new UdpSocket;
+        scope(exit) { udpSocket.close(); }
+
+        auto remoteAddr = new InternetAddress("192.168.1.255", androidUdpPort);
+        udpSocket.setOption(SocketOptionLevel.SOCKET, SocketOption.BROADCAST, true);
+
+        // build the recvFrom JSON object string to send
+        string msg = makeRecvFromJson(localHttpPort, destDirType, destSubdir, baseFilename);
+
+        // send the recvFrom command to android client
+        writefln("sending %s to %s", msg, to!string(remoteAddr));
+        auto len = udpSocket.sendTo(msg, remoteAddr);
+
+        bool ok = (len > 0 && len != Socket.ERROR);
+        if (ok)
+            writefln("sent datagram (%sbytes)", len);
+        else
+            writefln("error sending datagram (%s)", len);
+
+        return ok;
+    }
+
+
+    // throws
+    void waitForAndroidClientSocket(string waitingFor, int nbSecWaitClientSocket)
+    {
+        // open listen clientSocket
         Socket listener = new TcpSocket;
         assert(listener.isAlive);
         scope(exit) listener.close();
 
+        auto address = new InternetAddress(localHttpPort);
         listener.setOption(SocketOptionLevel.SOCKET, SocketOption.REUSEADDR, true);
-
-        listener.bind(new InternetAddress(port));
+        listener.bind(address);
         listener.listen(1);
-        writefln("Listening on port %d. file %s", port, filename);
+        writefln("Listening on port %d for %s", address.port(), waitingFor);
 
-        // accept/waitfor client connection
-        Socket socket = listener.accept();
-//        scope(exit) {
-//            socket.shutdown(SocketShutdown.BOTH);
-//            socket.close();
-//        }
+        // android client should connect right away if it is running & recvs the datagram !
+        // so do a select for 1sec waiting for connection
+        if (nbSecWaitClientSocket > 0)
+        {
+            SocketSet set = new SocketSet;
+            set.add(listener);
 
-        writefln("Connection from %s established.", socket.remoteAddress().toString());
-        assert(socket.isAlive);
+            int selectRes = Socket.select(set, null, null, nbSecWaitClientSocket * 1_000_000);
+            if (selectRes < 1) {
+                writefln("client failed to connect within %ssec", nbSecWaitClientSocket);
+                return;
+            }
+        }
+
+        // ok we have a connection waiting...
+        // accept client connection
+        clientSocket = listener.accept();
+
+        writefln("Connection from %s established.", clientSocket.remoteAddress().toString());
+        assert(clientSocket.isAlive);
         assert(listener.isAlive);
 
-        // ##TODO we should interpret the GET http command !!
+    }
 
-        SocketStream stream = new SocketStream(socket, FileMode.In);
 
-         foreach(ulong n, char[] line; stream)
-         {
-             writefln("line : %s", line);
-             if (line == "") // end of headers
-                break;
-         }
+    void readClientData()
+    {
+            SocketStream stream = new SocketStream(clientSocket, FileMode.In);
 
+            foreach(ulong n, char[] line; stream)
+            {
+                writefln("=> %s", line);
+                if (line == "") // end of headers
+                    break;
+            }
+
+    }
+
+    // throws
+    void prepareClientSocket()
+    {
+        // get connection from android client,
+        // here we wait until android download mgr service connects
+        waitForAndroidClientSocket("HTTP GET", 0);
+
+        if (clientSocket !is null)
+        {
+            // seems to need this !!
+
+            // Read the incoming GET request (need to read, otherwise it doesnt work !)
+            // ##TODO we should interpret the GET http command !!
+            // ## check that it is really the android client, asking for the correct file
+            readClientData();
+        }
+    }
+
+
+    void sendFile()
+    {
+        writefln("file %s\n", filePath);
+
+        enum BUFFERSZ = 1024*32;
 
         // open the file to send
         BufferedFile file = new BufferedFile();
-        file.open(filename);
+        file.open(filePath);
         scope(exit) file.close();
 
+        string fileSizeStr = to!string(file.size);
+
         // send back headers
-        debug writeln("Content-Length: " ~ to!string(file.size) ~ "\n");
+        debug writeln("Content-Length: " ~ fileSizeStr ~ "\n");
 
-        socket.send("HTTP/1.0 200 OK\n");
-        socket.send("Server: kwezMiniHttp\n");
-        socket.send("Connection: close\n");
-//        socket.send("Content-type: application/octet-stream\n");
-        socket.send("Content-type: image/jpeg\n");
-        socket.send("Content-Length: " ~ to!string(file.size) ~ "\n");
-        socket.send("\n");
+        clientSocket.send("HTTP/1.0 200 OK\n");
+        clientSocket.send("Server: androidHttpPush\n");
+        clientSocket.send("Connection: close\n");
+        clientSocket.send("Content-type: application/octet-stream\n");
+//            clientSocket.send("Content-type: image/jpeg\n");
+        clientSocket.send("Content-Length: " ~ fileSizeStr ~ "\n");
+        clientSocket.send("\n");
 
 
-version(all) {
         // send the file
-        byte[] buffer = new byte[1024*16];
-        size_t nbReadBytes;
+        byte[] buffer = new byte[BUFFERSZ];
         size_t total=0;
-        do
+        while (!file.eof())
         {
             // read block from file
-            nbReadBytes = file.readBlock(buffer.ptr, 1024*16);
-            // send the data to the client socket
-            socket.send(buffer[0..nbReadBytes]);
+            size_t nbBytes = file.readBlock(buffer.ptr, buffer.length);
+            if (nbBytes <= 0)
+                break;
 
-            // output nb bytes total
-            total += nbReadBytes;
-            writef("%s\r", total);
+            // & send the data to the client clientSocket
+            clientSocket.send(buffer[0..nbBytes]);
 
-        } while (nbReadBytes > 0);
+            // display progress : nb bytes total
+            total += nbBytes;
+            writef("%s\\%s\r", total, fileSizeStr);
+        }
 
         writeln("");
-}
-        foreach(ulong n, char[] line; stream)
-         {
-             writefln("line : %s", line);
-//             if (line == "") // end of headers
-//                break;
-         }
 
-
+        readClientData(); // seems to need this !!
     }
-    catch (SocketException ex)
+
+
+};
+
+
+
+int main(string[] args)
+{
+    AndroidHttpPush androidPush;
+    try
     {
-        writeln("SocketException ", ex.msg);
+        androidPush = new AndroidHttpPush(args);
+        androidPush.run();
     }
     catch (Exception ex)
     {
-        writeln("Exception ", ex.msg);
+        writeln("ooops, ", ex);
+        androidPush.showUsage();
     }
 
-//    stdin.readln();
-
+    // when in debugger
+    stdin.readln();
 	return 0;
 }
+
+
