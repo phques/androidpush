@@ -6,5 +6,6 @@
     <string name="title_activity_android_client">AndroidClient</string>
     <string name="button">Go!</string>
     <string name="edit_message"/>
+    <string name="gotoDownloads">Go to Downloads</string>
 
 </resources>

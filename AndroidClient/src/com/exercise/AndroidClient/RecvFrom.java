@@ -2,7 +2,6 @@ package com.exercise.AndroidClient;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,11 +9,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
-import android.net.Uri;
-import android.os.Environment;
-
 import android.app.DownloadManager;
 import android.app.DownloadManager.Request;
+import android.net.Uri;
+import android.os.Environment;
 
 
 public 	class RecvFrom {
@@ -23,6 +21,7 @@ public 	class RecvFrom {
 	
 	String json;
 	String errMessage;
+	Boolean valid = false;
 	
 	int remotePort;
 	String remoteHost;
@@ -42,40 +41,53 @@ public 	class RecvFrom {
 		destDirTypes.put("downloads", Environment.DIRECTORY_DOWNLOADS);
 		destDirTypes.put("pictures", Environment.DIRECTORY_PICTURES);
 		destDirTypes.put("movies", Environment.DIRECTORY_MOVIES);
+		valid = true;
 	}
 	
 	RecvFrom(String errMessage) {
 		this.errMessage = errMessage;
+		valid = false;
 	}
 	
 	void execute() throws IOException {
+		// get source URL
+		Uri srcUri = getSrcFileUri();
+		
 		// get file destination
-		File destFilePath = getDestFilepath();
+		Uri destFileUri = getDestFileUri();
 		
-		// need to convert java.net.URI to android.net.Uti ;-p 
-		URI destFileURI = destFilePath.toURI();
-		Uri destFileUri = Uri.parse(destFileURI.toString());
-//		String uriStr = destFilePath.toString();
+		// build the request we will pass to download manager 
+        Request request = new Request(srcUri);
+        request.setDestinationUri(destFileUri)
+        	.setDescription("Push to Android from PC")
+        	.setTitle(filename)
+        	//.setAllowedOverMetered(false) //api 16
+        	.setAllowedNetworkTypes(Request.NETWORK_WIFI) // only through wifi !
+        	.setNotificationVisibility(Request.VISIBILITY_VISIBLE)
+        	.allowScanningByMediaScanner();
+    
+    	// ask download manager to download our file.
+    	// system service that runs in the background,
+    	// will show status in notif bar, can be seen / stop etc in the 'Downloads' app
+    	long downloadId = downloadMgr.enqueue(request);
+	}
+
+	private Uri getSrcFileUri() {
+		// get source URL 
+		Uri.Builder builder = new Uri.Builder();
+		builder.scheme("http")
+			.encodedPath("//" + remoteHost + ":" + remotePort)
+			.appendPath(filename);
 		
-/*        Request request = new Request();
-        
-        request.setDestinationUri(destFileUri);
-        request.setDescription("Push to Android from PC");
-*/        
-        try {
-        	// ask download manager to download our file
-        	// system service that runs in the background,
-        	// will show status in notif bar, can be seen / stop etc in 'Downloads app'
-//        	downloadMgr.enqueue(request);
-        }
-        catch (Exception ex) {        
-        	ex.printStackTrace();
-        }
+		return builder.build();
 		
+//		String srcUrl = "http:/" + remoteHost + ":" + remotePort;
+//		srcUrl = srcUrl + "/" + filename;
+//		Uri srcUri = Uri.parse(srcUrl);
 	}
 	
 
-	private File getDestFilepath() throws IOException {
+	private Uri getDestFileUri() throws IOException {
 		
 		// map "music" to Environment.DIRECTORY_MUSIC 
 		String destDir = destDirTypes.get(destinationType);
@@ -93,7 +105,8 @@ public 	class RecvFrom {
 		}
 
 		// the full path to the file
-		return new File(dir, filename);
+		File path = new File(dir, filename);
+		return Uri.fromFile(path);
 	}
 
 	/** */
@@ -102,7 +115,7 @@ public 	class RecvFrom {
 		remotePort = object.getInt("recvFromPort");
 		filename = object.getString("file");  
 		subDir = object.getString("subDir");  
-		destinationType = object.getString("destinationType");  
+		destinationType = object.getString("destDirType");  
 	}
 	
 }
