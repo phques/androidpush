@@ -12,9 +12,21 @@ import std.socketstream;
 import std.getopt;
 import std.json;
 
+import mimeTypes;
 
 class AndroidHttpPush
 {
+    private void handleFileParam(string opt, string fileParam)
+    {
+        filePath = fileParam;
+
+        if (!exists(filePath) || !isFile(filePath))
+            throw new Exception("'%s' is not a file", filePath);
+
+        baseFilename = baseName(filePath);
+    }
+
+
     this(string[] args)
     {
         getopt(args,
@@ -22,19 +34,11 @@ class AndroidHttpPush
             "localHttpPort", &localHttpPort,
             "destDirType", &destDirType,
             "destSubdir", &destSubdir,
-            "file", &filePath
+            "file", &handleFileParam
             );
 
-        if (filePath is null)
-            throw new Exception("missing filepath");
-
-        baseFilename = baseName(filePath);
-
-        if (!exists(filePath) || !isFile(filePath))
-            throw new Exception("'%s' is not a file", filePath);
-
         if (args.length != 1)
-            throw new Exception("invalid argument");
+            throw new Exception("invalid argument : " ~ args[1]);
     }
 
     void showUsage()
@@ -98,7 +102,7 @@ class AndroidHttpPush
             }
             else
             {
-                writeln("\n*** unable to connect with Android client");
+                writeln("\n*** unable to connect to Android client");
             }
         }
         catch (SocketException ex)
@@ -259,8 +263,9 @@ private:
         clientSocket.send("HTTP/1.0 200 OK\n");
         clientSocket.send("Server: androidHttpPush\n");
         clientSocket.send("Connection: close\n");
-        clientSocket.send("Content-type: application/octet-stream\n");
-//            clientSocket.send("Content-type: image/jpeg\n");
+        clientSocket.send("Content-type: " ~ MimeTypes.getFromFile(baseFilename) ~ "\n");
+//        clientSocket.send("Content-type: application/octet-stream\n");
+//        clientSocket.send("Content-type: image/jpeg\n");
         clientSocket.send("Content-Length: " ~ fileSizeStr ~ "\n");
         clientSocket.send("\n");
 

@@ -11,7 +11,7 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="dmd" />
-				<Option parameters="--androidUdpPort=4445 --localHttpPort=8080 --destDirType=downloads --destSubdir=androidPush --file=fract-pyr1.jpg  " />
+				<Option parameters="--androidUdpPort=4444  --localHttpPort=8080  --destDirType=downloads  --destSubdir=androidPush  --file=fract-pyr1.jpg  " />
 				<Compiler>
 					<Add option="-g" />
 					<Add option="-debug" />
@@ -36,6 +36,7 @@
 			<Option compile="0" />
 			<Option link="0" />
 		</Unit>
+		<Unit filename="mimeTypes.d" />
 		<Extensions>
 			<code_completion />
 			<debugger />
