@@ -6,11 +6,15 @@ AndroidClient
 + handles one file at time right now,
   + autom. go into GO mode (no button ;-p)
   and loop after done
++ move socket creation / ownership into asynch thread ?
 
 FileServer
 ----------
 + use a pushId, send in recvFrom object, back with ACK message, *and* used as the GET request
 + verify incoming GET request !!
++ retry loop
+  + reduce console output on 
+  & faster more attemps 
 
 + some GUI ?
   + GUI just front-end to console app ? (not so nice on Windows)

@@ -1,0 +1,4 @@
+#!/bin/sh 
+# formats file mimeTypesExt.txt to be used inside mimeTypes.d
+awk '{ printf(" \"%s\" : \"%s\", \n", $1, $2 ); }' mimeTypesExt.txt
+
