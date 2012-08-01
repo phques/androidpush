@@ -109,7 +109,7 @@ public 	class RecvFrom {
 		return Uri.fromFile(path);
 	}
 
-	/** */
+	/** extract data from the jons object string */
 	private void parseJson(String json) throws JSONException {			
 		JSONObject object = (JSONObject) new JSONTokener(json).nextValue();
 		remotePort = object.getInt("recvFromPort");

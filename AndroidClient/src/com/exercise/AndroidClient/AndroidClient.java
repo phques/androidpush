@@ -1,15 +1,12 @@
 package com.exercise.AndroidClient;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 
 import org.json.JSONException;
 
@@ -26,17 +23,16 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
+
 
 public class AndroidClient extends Activity {
 
 	EditText textOut;
-	DownloadWebpageText downloader;
-	DownloadManager downloadMgr;
-	DatagramSocket socket;
 	short udpPort = 4444;
+	RecvFileAsyncTask recvAsyncTask;
+	DownloadManager downloadMgr;
+	
 	
 	/** Called when the activity is first created. */
 	@Override
@@ -46,94 +42,54 @@ public class AndroidClient extends Activity {
 
 		textOut = (EditText)findViewById(R.id.textout);
 		
-		Button buttonSend = (Button)findViewById(R.id.send);
-		buttonSend.setOnClickListener(buttonSendOnClickListener);
-		
 		downloadMgr = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
 	}
 
-	// opens the Downsloads app/view
+	// button action, opens the Downsloads app/view
 	public void showDownload(View view) {
 		Intent i = new Intent();
 		i.setAction(DownloadManager.ACTION_VIEW_DOWNLOADS);
 		startActivity(i);
 	}
 
-
-	private void openUdpSocket() {
-		try {
-			// open a udp socket to receive commands
-//			socket = new DatagramSocket();
-			socket = new DatagramSocket(udpPort);
-//			socket = new DatagramSocket(null);
-//			socket.setReuseAddress(true);		// .. and reuse ! (so we can restart while debugging)
-//			socket.bind(new InetSocketAddress(udpPort)); // void return ! cant check if worked !!!
-			Log.d("", "isbound " + socket.isBound());
-			Log.d("", "isConnected " + socket.isConnected());
-			Log.d("", "on port " + socket.getLocalPort());
+	// button action, start the asynch task
+	public void onGo(View view) {
+		if (recvAsyncTask == null) {
+			recvAsyncTask = new RecvFileAsyncTask();
+			recvAsyncTask.execute();
+		} else {
+			textOut.append("already waiting ...\n");
 		}
-		catch (SocketException e) {
-			e.printStackTrace();
-			textOut.setText(e.getMessage());
-
-			if (socket != null){
-				socket.close();
-				socket = null;
-			}
-		}		
 	}
 	
-	Button.OnClickListener buttonSendOnClickListener = new Button.OnClickListener() {
-		public void onClick(View arg0) {
-			if (socket != null) {
-				if (downloader == null) {
-					textOut.setText("waiting on " + socket.getLocalPort() + "...\n");
-					downloader = new DownloadWebpageText();
-					downloader.execute();
-				} else {
-					textOut.append("already waiting ...\n");
-				}
-			} else {
-				textOut.append("no socket !!\n");
-			}
-		}
-	};
 		 
 	@Override
 	public void onStart() {
 		super.onStart();  // Always call the superclass method first
-
-		openUdpSocket(); 
 	}
 
-	
 	@Override
 	public void onStop() {
 		super.onStop();  // Always call the superclass method first
-		
-		if (socket != null) {
-			socket.close();
-			socket = null;
-		}
+
 	}
-	
 	@Override
 	public void onDestroy() {
 	    super.onDestroy();  // Always call the superclass
 	    
 	    // probably not needed, onStop closes the socket, which should make the thread stop (?)
-	    if (downloader != null)
-	    	downloader.cancel(true);
+	    if (recvAsyncTask != null)
+	    	recvAsyncTask.cancel(true);
 	    
-	    downloader = null;
+	    recvAsyncTask = null;
 	}
-
 	
 	@Override
 	protected void onResume() {
 		super.onResume();
 
-        registerReceiver(broadcastReceiver, 
+        // register for download mgr notifications
+		registerReceiver(broadcastReceiver, 
         		new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
 	}
 
@@ -143,7 +99,7 @@ public class AndroidClient extends Activity {
 		unregisterReceiver(broadcastReceiver);
 	}
 	
-	
+	// receives download mgr notifications
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -154,7 +110,8 @@ public class AndroidClient extends Activity {
         	String action = intent.getAction();
             if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(action)) {
             	
-                long downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0);
+                // query about the status of the download etc
+            	long downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0);
                 Query query = new Query();
                 query.setFilterById(downloadId);
                 Cursor cursor = downloadMgr.query(query);
@@ -162,6 +119,7 @@ public class AndroidClient extends Activity {
                 if (cursor.moveToFirst()) {
                 	int status = getColumn(cursor, DownloadManager.COLUMN_STATUS);
                 	int reason = getColumn(cursor, DownloadManager.COLUMN_REASON);
+                	
                     if (status == DownloadManager.STATUS_SUCCESSFUL) {
                     	message = "download succeeded\n";
                     }
@@ -192,66 +150,145 @@ public class AndroidClient extends Activity {
 
 	/*-----------------------------------------*/
 	
-	
-	private class DownloadWebpageText extends AsyncTask<Void, Void, RecvFrom> {
+	// AsyncTask that waits for a 'recvFrom' datagram (on Udp Socket) as a JSON object  
+	// then connects to server on PC to send a ACK message,
+	// then launches a download mgr download for the file
+	private class RecvFileAsyncTask extends AsyncTask<Void, Void, Void> {
+
+		private DatagramSocket udpSocket;
+		private RecvFrom recvFrom;
+		
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			
+			openUdpSocket();
+			
+			if (udpSocket != null) {
+				textOut.setText("waiting on " + udpSocket.getLocalPort() + "...\n");
+
+				//##NB: can't read udp datagram msg 'recvFrm' here .. in main thread !
+			}
+		}
 
 		//@Override
-		protected RecvFrom doInBackground(Void ... voids) {
-
-			RecvFrom recvFrom = null;
+		protected Void doInBackground(Void ... voids) {
+			
+			// wait for a udp 'recvFrom' message
 			try {
-				// Wait for a datagram to come in
-				byte[] buf = new byte[1024*4];
-				DatagramPacket packet = new DatagramPacket(buf, buf.length);
-				socket.receive(packet);
+				receiveRecvFromObj();
+				publishProgress(new Void[1]);
+				
+			} catch (IOException e1) {
+				e1.printStackTrace();
+				recvFrom = new RecvFrom(e1.getMessage());
+				cancel(false);
+			} catch (JSONException e1) {
+				e1.printStackTrace();
+				recvFrom = new RecvFrom(e1.getMessage());
+				cancel(false);
+			}
 
-				// Create a RecvFrom with the received data
-				String json = new String(packet.getData(), 0, packet.getLength());
-				String remoteHost = packet.getAddress().toString();
-				remoteHost = remoteHost.substring(1); // remove "/" at start of string !
-				
-				recvFrom = new RecvFrom(downloadMgr, json, remoteHost);
-				
+			if (!isCancelled()) 
+			try {
 				// do a 1st connection to server, sending an ACK string
 				// after the server receives this it knows to wait for the download request
 				Socket serverSocket = new Socket(recvFrom.remoteHost, recvFrom.remotePort);
+				
 				PrintStream outStream = new PrintStream(serverSocket.getOutputStream());
 				outStream.print("ACK\n");
+				
 				outStream.close();
-			
+				serverSocket.close();
+				
+				// launch the background download 
 				recvFrom.execute();
-							
+								
+			} catch (UnknownHostException e) {
+				e.printStackTrace();
+				recvFrom.errMessage += e.getMessage();
 			} catch (IOException e) {
 				e.printStackTrace();
-				recvFrom = new RecvFrom(e.getMessage());
-			} catch (JSONException e) {
-				e.printStackTrace();
-				recvFrom = new RecvFrom(e.getMessage());
-			} catch (Exception e) {
-				e.printStackTrace();
-				recvFrom = new RecvFrom(e.getMessage());
+				recvFrom.errMessage += e.getMessage();
 			}
-
-			return recvFrom;
+			
+			return null;
 		}
-		
+
+
+		@Override
+		protected void onProgressUpdate(Void... values) {
+			super.onProgressUpdate(values);
+			
+			if (recvFrom.valid) { // always true here !? 
+				textOut.append("received " + recvFrom.json + "\n");
+				textOut.append("from : " + recvFrom.remoteHost + "\n");
+			}
+		}
 
 		// onPostExecute displays the results of the AsyncTask.
-		//@Override
-		protected void onPostExecute(RecvFrom recvFrom) {
+		@Override
+		protected void onPostExecute(Void q) {
+			// isCancelled() always false here ?
 			if (recvFrom != null && !isCancelled()) {
-				if (recvFrom.valid) { 
-					textOut.append("received " + recvFrom.json + "\n");
-					textOut.append("from : " + recvFrom.remoteHost + "\n");
-				}
-				
 				if (recvFrom.errMessage != null)
 					textOut.append(recvFrom.errMessage + "\n");
 			}
 			
-			// we're done, clear out the ref to us in the parent class
-			downloader = null;
+			// we're done
+			cleanup();
 		}
-	}	    
+		
+		@Override
+		protected void onCancelled(Void q) {
+			// we're done
+			cleanup();
+		}
+		
+		private void openUdpSocket() {
+			try {
+				// open a udp socket to receive commands
+//				socket = new DatagramSocket();
+				udpSocket = new DatagramSocket(udpPort);
+//				socket = new DatagramSocket(null);
+//				socket.setReuseAddress(true);		// .. and reuse ! (so we can restart while debugging)
+//				socket.bind(new InetSocketAddress(udpPort)); // void return ! cant check if worked !!!
+				Log.d("", "isbound " + udpSocket.isBound());
+				Log.d("", "isConnected " + udpSocket.isConnected());
+				Log.d("", "on port " + udpSocket.getLocalPort());
+			}
+			catch (SocketException e) {
+				e.printStackTrace();
+				textOut.setText(e.getMessage());
+			}		
+		}		
+	
+		// receive a recvFrom object from udp datagram in a JSON object string 
+		private void receiveRecvFromObj() throws IOException, JSONException {
+			// Wait for a datagram to come in
+			byte[] buf = new byte[1024*4];
+			DatagramPacket packet = new DatagramPacket(buf, buf.length);
+			udpSocket.receive(packet);
+
+			// Create a RecvFrom with the received data
+			String json = new String(packet.getData(), 0, packet.getLength());
+			String remoteHost = packet.getAddress().toString();
+			remoteHost = remoteHost.substring(1); // remove "/" at start of string !
+			
+			recvFrom = new RecvFrom(downloadMgr, json, remoteHost);
+		}
+		
+
+		private void cleanup() {
+			if (udpSocket != null){
+				udpSocket.close();
+				udpSocket = null;
+			}
+			
+			// we're done, clear out the ref to us in the parent class			
+			recvAsyncTask = null;
+		}
+
+	}   
 
 }
