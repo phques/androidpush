@@ -1,5 +1,0 @@
---androidUdpPort=4445
---localHttpPort=8080
---destDirType=downloads
---destSubdir=androidPush
---file=fract-pyr1.jpg 
