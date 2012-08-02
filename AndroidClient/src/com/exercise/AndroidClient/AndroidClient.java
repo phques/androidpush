@@ -117,11 +117,12 @@ public class AndroidClient extends Activity {
                 Cursor cursor = downloadMgr.query(query);
                 
                 if (cursor.moveToFirst()) {
-                	int status = getColumn(cursor, DownloadManager.COLUMN_STATUS);
-                	int reason = getColumn(cursor, DownloadManager.COLUMN_REASON);
+                	int status = getColumnInt(cursor, DownloadManager.COLUMN_STATUS);
+                	int reason = getColumnInt(cursor, DownloadManager.COLUMN_REASON);
                 	
                     if (status == DownloadManager.STATUS_SUCCESSFUL) {
-                    	message = "download succeeded\n";
+                    	String title = getColumnString(cursor, DownloadManager.COLUMN_TITLE); 
+                    	message = "download succeeded : " + title + "\n";
                     }
                     else if (status == DownloadManager.STATUS_FAILED) {
                     	message = "download failed, reason = " + reason + "\n";
@@ -136,11 +137,16 @@ public class AndroidClient extends Activity {
             textOut.append(message);
         }
         
-        private int getColumn(Cursor cursor, String columnID) {
+        private int getColumnInt(Cursor cursor, String columnID) {
             int columnIndex = cursor.getColumnIndex(columnID);
             return cursor.getInt(columnIndex);
         }
-    };
+
+        private String getColumnString(Cursor cursor, String columnID) {
+            int columnIndex = cursor.getColumnIndex(columnID);
+            return cursor.getString(columnIndex);
+        }
+};
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -206,10 +212,10 @@ public class AndroidClient extends Activity {
 								
 			} catch (UnknownHostException e) {
 				e.printStackTrace();
-				recvFrom.errMessage += e.getMessage();
+				recvFrom.addErrMessage("\n" + e.getMessage());
 			} catch (IOException e) {
 				e.printStackTrace();
-				recvFrom.errMessage += e.getMessage();
+				recvFrom.addErrMessage("\n" + e.getMessage());
 			}
 			
 			return null;
@@ -231,8 +237,8 @@ public class AndroidClient extends Activity {
 		protected void onPostExecute(Void q) {
 			// isCancelled() always false here ?
 			if (recvFrom != null && !isCancelled()) {
-				if (recvFrom.errMessage != null)
-					textOut.append(recvFrom.errMessage + "\n");
+				if (recvFrom.getErrMessage() != null)
+					textOut.append(recvFrom.getErrMessage() + "\n");
 			}
 			
 			// we're done

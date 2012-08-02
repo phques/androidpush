@@ -20,8 +20,8 @@ public 	class RecvFrom {
 	Map<String,String> destDirTypes;
 	
 	String json;
-	String errMessage;
 	Boolean valid = false;
+	private String errMessage;
 	
 	int remotePort;
 	String remoteHost;
@@ -48,8 +48,23 @@ public 	class RecvFrom {
 		this.errMessage = errMessage;
 		valid = false;
 	}
+
+	public String getErrMessage() {
+		return errMessage;
+	}
+
+	public void setErrMessage(String errMessage) {
+		this.errMessage = errMessage;
+	}
+
+	public void addErrMessage(String errMessage) {
+		if (this.errMessage == null)
+			this.errMessage = errMessage;
+		else
+			this.errMessage += errMessage;
+	}
 	
-	void execute() throws IOException {
+	public void execute() throws IOException {
 		// get source URL
 		Uri srcUri = getSrcFileUri();
 		
