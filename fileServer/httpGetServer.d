@@ -37,7 +37,7 @@ class AndroidHttpPush
             "file", &handleFileParam
             );
 
-        if (args.length != 1)
+        if (args.length > 1)
             throw new Exception("invalid argument : " ~ args[1]);
     }
 
@@ -54,7 +54,7 @@ class AndroidHttpPush
     {
         try
         {
-            enum NbRetries = 5;
+            enum NbRetries = 15; // 15 x 1sec
             bool ok = false;
             for (auto retry=0; retry < NbRetries && !ok; retry++)
             {
@@ -160,13 +160,14 @@ private:
         string msg = makeRecvFromJson(localHttpPort, destDirType, destSubdir, baseFilename);
 
         // send the recvFrom command to android client
-        writefln("sending %s to %s", msg, to!string(remoteAddr));
+        //writefln("sending %s to %s", msg, to!string(remoteAddr));
         auto len = udpSocket.sendTo(msg, remoteAddr);
 
         bool ok = (len > 0 && len != Socket.ERROR);
-        if (ok)
-            writefln("sent datagram (%sbytes)", len);
-        else
+//        if (ok)
+//            writefln("sent datagram (%sbytes)", len);
+//        else
+        if (!ok)
             writefln("error sending datagram (%s)", len);
 
         return ok;
