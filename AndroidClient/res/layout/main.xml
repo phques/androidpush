@@ -3,12 +3,13 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     >
+
 <Button
     android:id="@+id/send"
-    android:layout_width="fill_parent" 
+    android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:text="@string/button" 
-    />
+    android:onClick="onGo"
+    android:text="@string/button" />
 
 <Button
     android:id="@+id/gotoDownloads"
