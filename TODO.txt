@@ -6,15 +6,11 @@ AndroidClient
 + handles one file at time right now,
   + autom. go into GO mode (no button ;-p)
   and loop after done
-+ move socket creation / ownership into asynch thread ?
 
 FileServer
 ----------
 + use a pushId, send in recvFrom object, back with ACK message, *and* used as the GET request
 + verify incoming GET request !!
-+ retry loop
-  + reduce console output on 
-  & faster more attemps 
 
 + some GUI ?
   + GUI just front-end to console app ? (not so nice on Windows)
@@ -30,7 +26,7 @@ FileServer
 
 + actually just some need some 'shortcuts', using the 'rootdir' idea !
 + new cmdline param rootdir,
-+ could support directory, do all files (what if subdirs !!??)
++ could support directory, do all files (what if subdirs !!?? --recursive opt)
 then drag n drop stuff on it ! (can we pass dropped stuff as param in Linux?)
     then shortcut "pushMusic" =
       fileServer --destDirType=music --rootDir=pathToMusicOnThisPC --file=$1 .. other params
