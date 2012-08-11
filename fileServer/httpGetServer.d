@@ -11,6 +11,8 @@ import std.socket;
 import std.socketstream;
 import std.getopt;
 import std.json;
+import std.format;
+import std.array;
 
 import mimeTypes;
 
@@ -21,7 +23,12 @@ class AndroidHttpPush
         filePath = fileParam;
 
         if (!exists(filePath) || !isFile(filePath))
-            throw new Exception("'%s' is not a file", filePath);
+        {
+            auto writer = appender!string();
+            formattedWrite(writer, "'%s' is not a file", filePath);
+
+            throw new Exception(writer.data);
+        }
 
         baseFilename = baseName(filePath);
     }
@@ -29,6 +36,9 @@ class AndroidHttpPush
 
     this(string[] args)
     {
+        if (args.length == 1)
+            throw new Exception("missings arguments");
+
         getopt(args,
             "androidUdpPort", &androidUdpPort,
             "localHttpPort", &localHttpPort,
@@ -41,13 +51,14 @@ class AndroidHttpPush
             throw new Exception("invalid argument : " ~ args[1]);
     }
 
-    void showUsage()
+    static void showUsage()
     {
-        writeln("--androidUdpPort");
-        writeln("--localHttpPort");
-        writeln("--destDirType");
-        writeln("--destSubdir");
-        writeln("--file");
+        writeln("usage:");
+        writeln("  --androidUdpPort");
+        writeln("  --localHttpPort");
+        writeln("  --destDirType");
+        writeln("  --destSubdir");
+        writeln("  --file");
     }
 
     void run()
@@ -309,8 +320,8 @@ int main(string[] args)
     }
     catch (Exception ex)
     {
-        writeln("ooops, ", ex);
-        androidPush.showUsage();
+        writeln("ooops, ", ex.msg);
+        AndroidHttpPush.showUsage();
     }
 
     // when in debugger
