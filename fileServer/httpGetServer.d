@@ -171,7 +171,8 @@ private:
         string msg = makeRecvFromJson(localHttpPort, destDirType, destSubdir, baseFilename);
 
         // send the recvFrom command to android client
-        //writefln("sending %s to %s", msg, to!string(remoteAddr));
+//        writefln("sending %s to %s", msg, to!string(remoteAddr));
+        writefln("sending UDP packet to %s", to!string(remoteAddr));
         auto len = udpSocket.sendTo(msg, remoteAddr);
 
         bool ok = (len > 0 && len != Socket.ERROR);
