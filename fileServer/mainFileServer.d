@@ -161,8 +161,15 @@ private:
 
         // make sure it parses ! (can throw exception)
         // and get back the actual 'official' JSON string ;-)
-        JSONValue val = parseJSON(jsonString);
-        jsonString = toJSON(&val);
+        version(MinGW){
+            // does not compile Mingw64, gdc.exe (tdm64-1) 4.6.1 !!!
+            // missing ref to json skipWhitespace() !!
+        }
+        else {
+            JSONValue val = parseJSON(jsonString);
+            //nicer output on android client ;-)
+            //jsonString = toJSON(&val);
+        }
 
         return jsonString;
     }
