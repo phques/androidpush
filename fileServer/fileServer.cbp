@@ -33,7 +33,7 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
-		<Unit filename="httpGetServer.d" />
+		<Unit filename="mainFileServer.d" />
 		<Unit filename="mimeTypes.d" />
 		<Extensions>
 			<code_completion />
