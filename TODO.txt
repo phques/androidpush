@@ -7,11 +7,12 @@ AndroidClient
   + autom. go into GO mode (no button ;-p)
   and loop after done
 + call media scanner after download, need Context for this
++ some GUI progress about download
++ will prob need to use different thread technique .. service of some sort
+
 
 FileServer
 ----------
-+ use a pushId, send in recvFrom object, back with ACK message, *and* used as the GET request
-+ verify incoming GET request !!
 
 + some GUI ?
   + GUI just front-end to console app ? (not so nice on Windows)
@@ -25,10 +26,10 @@ FileServer
         file=/home/kwez/Music/PatM/Fusion
         result subDir=PatM/Fusion
 
-+ actually just some need some 'shortcuts', using the 'rootdir' idea !
++ actually just need some 'shortcuts', using the 'rootdir' idea !
 + new cmdline param rootdir,
 + could support directory, do all files (what if subdirs !!?? --recursive opt)
-then drag n drop stuff on it ! (can we pass dropped stuff as param in Linux?)
+then drag n drop stuff on it ! (can we pass dropped stuff as param in Gnome? (no!) )
     then shortcut "pushMusic" =
       fileServer --destDirType=music --rootDir=pathToMusicOnThisPC --file=$1 .. other params
 
