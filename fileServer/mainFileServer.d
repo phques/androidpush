@@ -240,7 +240,8 @@ private:
 
     void sendFile()
     {
-        writefln("file %s\n", filePath);
+        writefln("file %s", filePath);
+        writefln("dest %s/%s", destDirType, destSubdir);
 
         enum BUFFERSZ = 1024*32;
 
@@ -262,8 +263,8 @@ private:
         byte[] buffer = new byte[BUFFERSZ];
         size_t total=0;
 
-        enum double PercentBase = 100; // percent or nb of characters of line
-        char[] line = new char[cast(uint)PercentBase];
+        enum int ProgressBarLen = 50; // nb of characters of progress line
+        char[] line = new char[ProgressBarLen];
         double lastPercent=0;
 
         while (!file.eof())
@@ -281,16 +282,13 @@ private:
             //writef("%s\\%s\r", total, file.size);
 
             // write out 'progress bar' of percentage
-            double percent = total * PercentBase / file.size;
+            double percent = total * 100.0 / file.size;
             if (percent != lastPercent) {
-                version(all) {
-                    line[0..cast(uint)percent] = '=';
-                    line[cast(uint)percent..$] = '-';
-                    write(line, '\r');
-                }
-                else {
-                    writef("%s%%\r", percent);
-                }
+                uint nbCharsDone = cast(uint)(percent/100*ProgressBarLen);
+                line[0..nbCharsDone] = '=';
+                line[nbCharsDone..$] = '-';
+                writef(" %02d%% %s\r", cast(int)percent, line);
+
                 stdout.flush();
                 lastPercent = percent;
             }
@@ -309,7 +307,7 @@ private:
 private:
     ushort androidUdpPort = 4444;
     ushort localHttpPort = 8080; // 80 not allowed on my ubuntu ;-p
-    string destDirType = "downloads";
+    string destDirType = "";
     string destSubdir = "";
     string filePath;
     string baseFilename;
