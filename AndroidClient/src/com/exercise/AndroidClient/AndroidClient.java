@@ -1,23 +1,15 @@
 package com.exercise.AndroidClient;
 
 import java.io.IOException;
-import java.io.PrintStream;
+import java.net.BindException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.Socket;
 import java.net.SocketException;
-import java.net.UnknownHostException;
-
 import org.json.JSONException;
 
 import android.app.Activity;
-import android.app.DownloadManager;
-import android.app.DownloadManager.Query;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.database.Cursor;
+import android.media.MediaScannerConnection;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -31,7 +23,6 @@ public class AndroidClient extends Activity {
 	EditText textOut;
 	short udpPort = 4444;
 	RecvFileAsyncTask recvAsyncTask;
-	DownloadManager downloadMgr;
 	
 	
 	/** Called when the activity is first created. */
@@ -41,15 +32,6 @@ public class AndroidClient extends Activity {
 		setContentView(R.layout.main);
 
 		textOut = (EditText)findViewById(R.id.textout);
-		
-		downloadMgr = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
-	}
-
-	// button action, opens the Downsloads app/view
-	public void showDownload(View view) {
-		Intent i = new Intent();
-		i.setAction(DownloadManager.ACTION_VIEW_DOWNLOADS);
-		startActivity(i);
 	}
 
 	// button action, start the asynch task
@@ -88,65 +70,12 @@ public class AndroidClient extends Activity {
 	protected void onResume() {
 		super.onResume();
 
-        // register for download mgr notifications
-		registerReceiver(broadcastReceiver, 
-        		new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
 	}
 
 	@Override
 	protected void onPause() {
 		super.onPause();
-		unregisterReceiver(broadcastReceiver);
 	}
-	
-	// receives download mgr notifications
-    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-        	String message = "Failed to understand download mgr notification !\n";
-        	
-            // sanity check, we register with intent ACTION_DOWNLOAD_COMPLETE
-        	String action = intent.getAction();
-            if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(action)) {
-            	
-                // query about the status of the download etc
-            	long downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0);
-                Query query = new Query();
-                query.setFilterById(downloadId);
-                Cursor cursor = downloadMgr.query(query);
-                
-                if (cursor.moveToFirst()) {
-                	int status = getColumnInt(cursor, DownloadManager.COLUMN_STATUS);
-                	int reason = getColumnInt(cursor, DownloadManager.COLUMN_REASON);
-                	
-                    if (status == DownloadManager.STATUS_SUCCESSFUL) {
-                    	String title = getColumnString(cursor, DownloadManager.COLUMN_TITLE); 
-                    	message = "download succeeded : " + title + "\n";
-                    }
-                    else if (status == DownloadManager.STATUS_FAILED) {
-                    	message = "download failed, reason = " + reason + "\n";
-                    }
-                    else {
-                    	message = "download status = " + status + 
-                    			  " reason = " + reason + "\n";
-                    }
-                }
-            }
-
-            textOut.append(message);
-        }
-        
-        private int getColumnInt(Cursor cursor, String columnID) {
-            int columnIndex = cursor.getColumnIndex(columnID);
-            return cursor.getInt(columnIndex);
-        }
-
-        private String getColumnString(Cursor cursor, String columnID) {
-            int columnIndex = cursor.getColumnIndex(columnID);
-            return cursor.getString(columnIndex);
-        }
-};
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -191,31 +120,14 @@ public class AndroidClient extends Activity {
 				cancel(false);
 			} catch (JSONException e1) {
 				e1.printStackTrace();
-				recvFrom = new RecvFrom(e1.getMessage());
+				recvFrom = new RecvFrom("JSONException : " + e1.getMessage());
 				cancel(false);
 			}
 
-			if (!isCancelled()) 
-			try {
-				// do a 1st connection to server, sending an ACK string
-				// after the server receives this it knows to wait for the download request
-				Socket serverSocket = new Socket(recvFrom.remoteHost, recvFrom.remotePort);
-				
-				PrintStream outStream = new PrintStream(serverSocket.getOutputStream());
-				outStream.print("ACK\n");
-				
-				outStream.close();
-				serverSocket.close();
-				
+			// do the download
+			if (!isCancelled() && recvFrom.valid) { 
 				// launch the background download 
 				recvFrom.execute();
-								
-			} catch (UnknownHostException e) {
-				e.printStackTrace();
-				recvFrom.addErrMessage("\n" + e.getMessage());
-			} catch (IOException e) {
-				e.printStackTrace();
-				recvFrom.addErrMessage("\n" + e.getMessage());
 			}
 			
 			return null;
@@ -237,8 +149,12 @@ public class AndroidClient extends Activity {
 		protected void onPostExecute(Void q) {
 			// isCancelled() always false here ?
 			if (recvFrom != null && !isCancelled()) {
-				if (recvFrom.getErrMessage() != null)
+				if (recvFrom.getErrMessage() != null) {
 					textOut.append(recvFrom.getErrMessage() + "\n");
+				}
+				else {
+					textOut.append("done, file " + recvFrom.filename + "\n");
+				}
 			}
 			
 			// we're done
@@ -248,6 +164,10 @@ public class AndroidClient extends Activity {
 		@Override
 		protected void onCancelled(Void q) {
 			// we're done
+			if (recvFrom != null && recvFrom.getErrMessage() != null) {
+				textOut.append(recvFrom.getErrMessage() + "\n");
+			}
+			
 			cleanup();
 		}
 		
@@ -263,6 +183,10 @@ public class AndroidClient extends Activity {
 				Log.d("", "isConnected " + udpSocket.isConnected());
 				Log.d("", "on port " + udpSocket.getLocalPort());
 			}
+			catch (BindException e) {
+				e.printStackTrace();
+				textOut.setText(e.getMessage());
+			}				
 			catch (SocketException e) {
 				e.printStackTrace();
 				textOut.setText(e.getMessage());
@@ -281,7 +205,7 @@ public class AndroidClient extends Activity {
 			String remoteHost = packet.getAddress().toString();
 			remoteHost = remoteHost.substring(1); // remove "/" at start of string !
 			
-			recvFrom = new RecvFrom(downloadMgr, json, remoteHost);
+			recvFrom = new RecvFrom(json, remoteHost);
 		}
 		
 

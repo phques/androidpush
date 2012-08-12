@@ -1,7 +1,15 @@
 package com.exercise.AndroidClient;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,14 +17,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
-import android.app.DownloadManager;
-import android.app.DownloadManager.Request;
-import android.net.Uri;
+import android.media.MediaScannerConnection;
 import android.os.Environment;
-
+import android.util.Log;
+import android.net.Uri;
 
 public 	class RecvFrom {
-	DownloadManager downloadMgr;
 	Map<String,String> destDirTypes;
 	
 	String json;
@@ -24,14 +30,17 @@ public 	class RecvFrom {
 	private String errMessage;
 	
 	int remotePort;
+	int pushId = 0;
+	long fileLength = 0;
 	String remoteHost;
 	String destinationType;  
 	String subDir;  
 	String filename;  
 	
+	final int BUFFER_SIZE = 1024*32;
+	Socket serverSocket=null;
 
-	RecvFrom(DownloadManager downloadMgr, String json, String remoteHost) throws JSONException {
-		this.downloadMgr = downloadMgr;
+	RecvFrom(String json, String remoteHost) throws JSONException {
 		this.remoteHost = remoteHost;
 		this.json = json;
 		parseJson(json);
@@ -64,45 +73,107 @@ public 	class RecvFrom {
 			this.errMessage += errMessage;
 	}
 	
-	public void execute() throws IOException {
-		// get source URL
-		Uri srcUri = getSrcFileUri();
+	public void execute() {
 		
+		try {
+			// do a 1st connection to server, sending an ACK string
+			// after the server receives this it knows to wait for the download request
+			serverSocket = new Socket(remoteHost, remotePort);
+			
+			PrintStream outStream = new PrintStream(serverSocket.getOutputStream());
+			outStream.print("ACK\n");
+			outStream.print("pushId" + pushId + "\n");
+			
+			//
+			receiveFile();
+							
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+			addErrMessage("\n" + e.getMessage());
+		} catch (IOException e) {
+			e.printStackTrace();
+			addErrMessage("\n" + e.getMessage());
+		}
+		finally {
+			if (serverSocket != null) {
+				try {
+					serverSocket.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				serverSocket = null;
+			}
+		}
+		
+	}
+
+	private void receiveFile() throws IOException {
+
 		// get file destination
-		Uri destFileUri = getDestFileUri();
+		File destFilePath = getDestFilePath();
+
+		// write to file from socket
+		OutputStream out = null;
+		BufferedInputStream in = null;
+		//InputStream in = null;
+		byte[] buffer = new byte [BUFFER_SIZE];
+		long totalRead = 0;
 		
-		// build the request we will pass to download manager 
-        Request request = new Request(srcUri);
-        request.setDestinationUri(destFileUri)
-        	.setDescription("Push to Android from PC")
-        	.setTitle(filename)
-        	//.setAllowedOverMetered(false) //api 16
-        	.setAllowedNetworkTypes(Request.NETWORK_WIFI) // only through wifi !
-        	.setNotificationVisibility(Request.VISIBILITY_VISIBLE)
-        	.allowScanningByMediaScanner();
-    
-    	// ask download manager to download our file.
-    	// system service that runs in the background,
-    	// will show status in notif bar, can be seen / stop etc in the 'Downloads' app
-    	long downloadId = downloadMgr.enqueue(request);
+		try {
+			// open file
+			out = new BufferedOutputStream(
+					new FileOutputStream(destFilePath));
+			
+			// open socket stream
+			in = new BufferedInputStream(serverSocket.getInputStream());
+			//in = serverSocket.getInputStream();
+			
+			// loop read/write
+			while (totalRead < fileLength){
+				int nbRead = in.read(buffer, 0, buffer.length);
+				if (nbRead <= 0) // ooops
+					break;
+				out.write(buffer, 0, nbRead);
+				totalRead += nbRead;
+			}
+			
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			addErrMessage("\n" + e.getMessage());
+		}
+		finally {
+			if (out != null) {
+				out.close();
+			}
+			if (in != null){
+				in.close();
+			}
+
+			// check that we got the whole file
+			if (totalRead == fileLength) {
+		        // Tell the media scanner about the new file so that it is
+		        // immediately available to the user.
+//nb: cant call mediascanner here, needs Context
+/*		        MediaScannerConnection.scanFile(this,
+		                new String[] { recvFrom.getFilePath() }, null,
+		                new MediaScannerConnection.OnScanCompletedListener() {
+		            public void onScanCompleted(String path, Uri uri) {
+		                Log.i("ExternalStorage", "Scanned " + path + ":");
+		                Log.i("ExternalStorage", "-> uri=" + uri);
+		            }
+		        });
+*/			}
+			else {
+				// delete the file, it is invalid
+				destFilePath.delete();
+				addErrMessage("download stopped before full file length, deleting file");
+			}
+		}
+		
 	}
 
-	private Uri getSrcFileUri() {
-		// get source URL 
-		Uri.Builder builder = new Uri.Builder();
-		builder.scheme("http")
-			.encodedPath("//" + remoteHost + ":" + remotePort)
-			.appendPath(filename);
-		
-		return builder.build();
-		
-//		String srcUrl = "http:/" + remoteHost + ":" + remotePort;
-//		srcUrl = srcUrl + "/" + filename;
-//		Uri srcUri = Uri.parse(srcUrl);
-	}
-	
-
-	private Uri getDestFileUri() throws IOException {
+	private File getDestFilePath() throws IOException {
 		
 		// map "music" to Environment.DIRECTORY_MUSIC 
 		String destDir = destDirTypes.get(destinationType);
@@ -120,17 +191,18 @@ public 	class RecvFrom {
 		}
 
 		// the full path to the file
-		File path = new File(dir, filename);
-		return Uri.fromFile(path);
+		return new File(dir, filename);
 	}
 
-	/** extract data from the jons object string */
+	/** extract data from the json object string */
 	private void parseJson(String json) throws JSONException {			
 		JSONObject object = (JSONObject) new JSONTokener(json).nextValue();
 		remotePort = object.getInt("recvFromPort");
 		filename = object.getString("file");  
 		subDir = object.getString("subDir");  
-		destinationType = object.getString("destDirType");  
+		destinationType = object.getString("destDirType");
+		pushId = object.getInt("pushId");
+		fileLength = object.getLong("fileLength");
 	}
 	
 }

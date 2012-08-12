@@ -6,6 +6,7 @@ AndroidClient
 + handles one file at time right now,
   + autom. go into GO mode (no button ;-p)
   and loop after done
++ call media scanner after download, need Context for this
 
 FileServer
 ----------

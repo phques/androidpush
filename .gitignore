@@ -1,0 +1,9 @@
+*.[oa]
+*.layout
+*.depend
+obj/
+bin/
+.metadata/
+fileServer/data/
+/gitgui
+/gitk

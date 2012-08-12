@@ -13,6 +13,7 @@ import std.getopt;
 import std.json;
 import std.format;
 import std.array;
+import std.datetime;
 
 import mimeTypes;
 
@@ -20,17 +21,30 @@ class AndroidHttpPush
 {
     private void handleFileParam(string opt, string fileParam)
     {
-        filePath = fileParam;
+        // check if it is a file, we also get it's length
+        DirEntry entry;
+        bool ok = true;
+        try {
+            entry = dirEntry(fileParam);
+            ok = entry.isFile;
+        }
+        catch (FileException e) {
+            ok = false;
+        }
 
-        if (!exists(filePath) || !isFile(filePath))
+        if (ok)
+        {
+            filePath = fileParam;
+            baseFilename = baseName(filePath);
+            fileLength = entry.size;
+        }
+        else
         {
             auto writer = appender!string();
-            formattedWrite(writer, "'%s' is not a file", filePath);
+            formattedWrite(writer, "'%s' is not a file", fileParam);
 
             throw new Exception(writer.data);
         }
-
-        baseFilename = baseName(filePath);
     }
 
 
@@ -65,7 +79,14 @@ class AndroidHttpPush
     {
         try
         {
-            enum NbRetries = 15; // 15 x 1sec
+            debug {
+                enum NbRetries = 1;
+                enum NbSecWait = 0;
+            }
+            else {
+                enum NbRetries = 15; // 15 x 1sec
+                enum NbSecWait = 1;
+            }
             bool ok = false;
             for (auto retry=0; retry < NbRetries && !ok; retry++)
             {
@@ -74,7 +95,7 @@ class AndroidHttpPush
                 {
                     // get 1st connection from android client
                     // quick connect: android client app should connect & send ACK right away
-                    waitForAndroidClientSocket("ACK", 1);
+                    waitForAndroidClientSocket("ACK", NbSecWait);
                     if (clientSocket !is null)
                     {
                         scope(exit) {
@@ -86,32 +107,28 @@ class AndroidHttpPush
                         // check that we recvd a ACK from android client
                         SocketStream stream = new SocketStream(clientSocket, FileMode.In);
                         char[] ackLine = stream.readLine();
-                        stream.close();
+                        char[] pushIdLine = stream.readLine();
+                        //stream.close();
 
-                        ok = ackLine == "ACK";
+                        bool okAck = (ackLine == "ACK");
+                        bool okPushId = (pushIdLine == "pushId" ~ to!string(pushId));
+                        ok = okAck &&  okPushId;
+
+                        if (ok) {
+                            // send the file to client
+                            sendFile();
+                            writeln("succeeded in sending file ", baseFilename);
+                        }
+                        else {
+                            writeln("did not receive proper ACK & pushId from Android client");
+                            debug writefln("ack : '%s'", ackLine);
+                            debug writefln("pushId : '%s'", pushIdLine);
+                        }
                     }
                 }
             }
 
-            if (ok)
-            {
-                // get connection to android client
-                writeln("");
-                prepareClientSocket();
-                if (clientSocket !is null)
-                {
-                    scope(exit) {
-                        clientSocket.shutdown(SocketShutdown.BOTH);
-                        clientSocket.close();
-                        clientSocket = null;
-                    }
-
-                    // send the file to client
-                    sendFile();
-                    writeln("succeeded in sending file ", baseFilename);
-                }
-            }
-            else
+            if (!ok)
             {
                 writeln("\n*** unable to connect to Android client");
             }
@@ -127,25 +144,20 @@ class AndroidHttpPush
     }
 
 private:
-    ushort androidUdpPort = 4445;
-    ushort localHttpPort = 8080; // 80 not allowed on my ubuntu ;-p
-    string destDirType = "downloads";
-    string destSubdir = "";
-    string filePath;
-    string baseFilename;
 
-    Socket clientSocket;
-
-    // create a JSON 'recFrom' object string
-    string makeRecvFromJson(ushort localPort, string destDirType, string subdir, string file)
+    // create a JSON 'recvFrom' object string
+    string makeRecvFromJson(ushort localPort, string destDirType, string subdir,
+                            string file, ulong fileLength, int pushId)
     {
         string jsonString =
         `{
+            "pushId" : %s,
             "recvFromPort" : %s,
             "destDirType" : "%s",
             "subDir" : "%s",
-            "file" : "%s"
-        }`.format(localPort, destDirType, subdir, file);
+            "file" : "%s",
+            "fileLength" : %s
+        }`.format(pushId, localPort, destDirType, subdir, file, fileLength);
 
         // make sure it parses ! (can throw exception)
         // and get back the actual 'official' JSON string ;-)
@@ -168,7 +180,9 @@ private:
         udpSocket.setOption(SocketOptionLevel.SOCKET, SocketOption.BROADCAST, true);
 
         // build the recvFrom JSON object string to send
-        string msg = makeRecvFromJson(localHttpPort, destDirType, destSubdir, baseFilename);
+        string msg = makeRecvFromJson(localHttpPort, destDirType, destSubdir, baseFilename,
+                                      fileLength, pushId);
+
 
         // send the recvFrom command to android client
 //        writefln("sending %s to %s", msg, to!string(remoteAddr));
@@ -224,68 +238,34 @@ private:
 
     }
 
-
-    void readClientData()
-    {
-            SocketStream stream = new SocketStream(clientSocket, FileMode.In);
-
-            foreach(ulong n, char[] line; stream)
-            {
-                writefln("=> %s", line);
-                if (line == "") // end of headers
-                    break;
-            }
-
-    }
-
-    // throws
-    void prepareClientSocket()
-    {
-        // get connection from android client,
-        // here we wait until android download mgr service connects
-        waitForAndroidClientSocket("HTTP GET", 0);
-
-        if (clientSocket !is null)
-        {
-            // seems to need this !!
-
-            // Read the incoming GET request (need to read, otherwise it doesnt work !)
-            // ##TODO we should interpret the GET http command !!
-            // ## check that it is really the android client, asking for the correct file
-            readClientData();
-        }
-    }
-
-
     void sendFile()
     {
         writefln("file %s\n", filePath);
 
         enum BUFFERSZ = 1024*32;
 
+        StopWatch stopWatch;
+        stopWatch.start();
+
         // open the file to send
         BufferedFile file = new BufferedFile();
         file.open(filePath);
         scope(exit) file.close();
 
-        string fileSizeStr = to!string(file.size);
-
-        // send back headers
-        debug writeln("Content-Length: " ~ fileSizeStr ~ "\n");
-
-        clientSocket.send("HTTP/1.0 200 OK\n");
-        clientSocket.send("Server: androidHttpPush\n");
-        clientSocket.send("Connection: close\n");
-        clientSocket.send("Content-type: " ~ MimeTypes.getFromFile(baseFilename) ~ "\n");
-//        clientSocket.send("Content-type: application/octet-stream\n");
-//        clientSocket.send("Content-type: image/jpeg\n");
-        clientSocket.send("Content-Length: " ~ fileSizeStr ~ "\n");
-        clientSocket.send("\n");
-
+        // sanity check
+        if (fileLength != file.size) {
+            writefln("fileLength from DirEntry (%s) <> file.size (%s)", fileLength, file.size);
+            throw new Exception("fileLength from DirEntry <> file.size");
+        }
 
         // send the file
         byte[] buffer = new byte[BUFFERSZ];
         size_t total=0;
+
+        enum double PercentBase = 100; // percent or nb of characters of line
+        char[] line = new char[cast(uint)PercentBase];
+        double lastPercent=0;
+
         while (!file.eof())
         {
             // read block from file
@@ -298,14 +278,45 @@ private:
 
             // display progress : nb bytes total
             total += nbBytes;
-            writef("%s\\%s\r", total, fileSizeStr);
+            //writef("%s\\%s\r", total, file.size);
+
+            // write out 'progress bar' of percentage
+            double percent = total * PercentBase / file.size;
+            if (percent != lastPercent) {
+                version(all) {
+                    line[0..cast(uint)percent] = '=';
+                    line[cast(uint)percent..$] = '-';
+                    write(line, '\r');
+                }
+                else {
+                    writef("%s%%\r", percent);
+                }
+                stdout.flush();
+                lastPercent = percent;
+            }
         }
 
-        writeln("");
+        stopWatch.stop();
 
-        readClientData(); // seems to need this !!
+        writefln("\n%s\n%s", total, file.size);
+
+        auto duration = stopWatch.peek();
+//        writefln("%s:%s", duration.seconds/60, duration.seconds%60);
+        writefln("\n%ssecs", duration.seconds);
     }
 
+
+private:
+    ushort androidUdpPort = 4444;
+    ushort localHttpPort = 8080; // 80 not allowed on my ubuntu ;-p
+    string destDirType = "downloads";
+    string destSubdir = "";
+    string filePath;
+    string baseFilename;
+    ulong fileLength = 0;
+    int pushId = 1; // used to identify / synch the 'push' (android client sends it back when it connects)
+
+    Socket clientSocket;
 
 };
 
@@ -325,8 +336,8 @@ int main(string[] args)
         AndroidHttpPush.showUsage();
     }
 
-    // when in debugger
-    stdin.readln();
+    // put breakpt here when in debugger, since terminal wont wait for Enter
+
 	return 0;
 }
 
