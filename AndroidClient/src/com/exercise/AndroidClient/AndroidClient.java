@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.BindException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetSocketAddress;
 import java.net.SocketException;
 import org.json.JSONException;
 
@@ -174,11 +175,10 @@ public class AndroidClient extends Activity {
 		private void openUdpSocket() {
 			try {
 				// open a udp socket to receive commands
-//				socket = new DatagramSocket();
-				udpSocket = new DatagramSocket(udpPort);
-//				socket = new DatagramSocket(null);
-//				socket.setReuseAddress(true);		// .. and reuse ! (so we can restart while debugging)
-//				socket.bind(new InetSocketAddress(udpPort)); // void return ! cant check if worked !!!
+//				udpSocket = new DatagramSocket(udpPort);
+				udpSocket = new DatagramSocket(null);
+				udpSocket.setReuseAddress(true);		// .. and reuse ! (so we can restart while debugging)
+				udpSocket.bind(new InetSocketAddress(udpPort)); // void return ! cant check if worked !!!
 				Log.d("", "isbound " + udpSocket.isBound());
 				Log.d("", "isConnected " + udpSocket.isConnected());
 				Log.d("", "on port " + udpSocket.getLocalPort());
