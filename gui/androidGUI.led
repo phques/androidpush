@@ -1,0 +1,24 @@
+# AndroidPush IUP GUI LED file
+
+mainDialog = DIALOG[TITLE="Android Push", SIZE=100, MARGINS=5x5]
+(
+  vbox[MARGIN=5x5, GAP=5x5, EXPAND=YES](
+    frame[TITLE="Local Root"](
+      localRoot = text[EXPAND=HORIZONTAL](null)
+    ),
+    
+    frame[TITLE="Destination Root"](
+      destinationRoot = list[1="aa",2="bb",3="cc", DROPDOWN="YES", EXPAND=HORIZONTAL](onDestRoot)
+    ),
+    
+    frame[TITLE="Files"](
+      files = list[EXPAND=YES](null)
+    ),
+    
+    fill(),
+    hbox[EXPAND=HORIZONTAL](
+      fill(),
+      pushButton = button("Push", onPushButton)
+    )
+  )
+)
