@@ -12,6 +12,14 @@ int main(string[] args)
 
         auto json = parseJSON(text);
         writeln(toJSON(&json));
+
+//        auto videos = json["videos"];
+        auto obj = json.object;
+        writeln(obj);
+        writeln(typeid(obj));
+        auto videos = obj["videos"];
+        writeln(typeid(videos));
+        writeln(videos);
     }
     catch (Exception e) {
         writeln("exception : ", e.msg);
