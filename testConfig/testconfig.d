@@ -10,16 +10,18 @@ int main(string[] args)
         string text = readText("config.json");
         writeln(text);
 
+        // top level object, contains obj localRoots
         auto json = parseJSON(text);
-        writeln(toJSON(&json));
-
-//        auto videos = json["videos"];
         auto obj = json.object;
+
+        auto localRoots = obj["localRoots"].object;
+        auto videos = localRoots["videos"];
+
         writeln(obj);
-        writeln(typeid(obj));
-        auto videos = obj["videos"];
-        writeln(typeid(videos));
-        writeln(videos);
+        writeln(typeid(obj), '\n');
+
+        writeln(videos, '\n');
+        writeln(videos.str);
     }
     catch (Exception e) {
         writeln("exception : ", e.msg);

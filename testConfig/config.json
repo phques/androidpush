@@ -1,11 +1,9 @@
 {
-  "music" : {
-  },
-  "videos" : {
-  },
-  "pictures" : {
-  },
-  "downloads" : {
+  "localRoots" : {
+    "music" : "",
+    "videos" : "/home/kwez/videos",
+    "download" : "",
+    "pictures" : ""
   }
 }
 
