@@ -1,0 +1,10 @@
+
+/****************************************************/
+/* The following lines will enable Windows XP/Vista Visual Styles */
+
+/* don't add this if building the DLL */
+#ifndef IUP_DLL
+1 24 "androidGUI.manifest"
+#endif
+
+/****************************************************/
