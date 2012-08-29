@@ -1,11 +1,11 @@
 # AndroidPush IUP GUI LED file
 
-mainDialog = DIALOG[TITLE="Android Push"]
+mainDialog = DIALOG[TITLE="Android Push", MINSIZE=300x300]
 (
   vbox[NMARGIN=5x5, NGAP=5x5, EXPAND=YES](
   
     frame[TITLE="Local Root"](
-      vbox[NMARGIN=5x2, EXPAND=YES](
+      vbox[NMARGIN=5x2, EXPAND=HORIZONTAL](
         localRoot = text[EXPAND=HORIZONTAL, MARGIN=5](do_nothing)
       )
     ),
@@ -19,7 +19,7 @@ mainDialog = DIALOG[TITLE="Android Push"]
         fill[SIZE=4](),
         vbox(
           label("Files"),
-          files = list[SIZE=175x75, EXPAND=YES](do_nothing)
+          files = list[EXPAND=YES](do_nothing)
         )
       )
     ),

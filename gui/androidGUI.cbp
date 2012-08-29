@@ -11,6 +11,7 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gdc" />
+				<Option use_console_runner="0" />
 				<Compiler>
 					<Add option="-funittest" />
 					<Add option="-g" />
@@ -45,6 +46,7 @@
 			<Add directory="$(#iup.lib)" />
 		</Linker>
 		<Unit filename="androidGUI.led" />
+		<Unit filename="loadledc.d" />
 		<Unit filename="main.d" />
 		<Extensions>
 			<code_completion />
