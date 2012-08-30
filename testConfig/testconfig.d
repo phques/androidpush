@@ -3,29 +3,35 @@ module main;
 import std.stdio;
 import std.conv;
 import std.file;
-import std.traits;
+import std.exception;
 
-import json; // probs w. std.json !!
+import json; // probs w. std.json w. GDCm, use a local modif of it!!
+
 
 class Wrap {
     JSONValue json;
+    string name;
 
-    this(string jsonString) { this.json = parseJSON(jsonString); }
-    this(JSONValue json) { this.json = json; }
+    this(string jsonString, string name) { this.name = name; this.json = parseJSON(jsonString); }
+    this(JSONValue json, string name) { this.name = name; this.json = json; }
 
-    auto opDispatch(string name)() {
-        debug writeln("opdispatch ", name);
-        assert(json.type == JSON_TYPE.OBJECT);
-        auto v = mixin(`json.object["`~name~`"]`);
-        return new Wrap(v);
+    // shortcut objWrap.memberX = objWrap.json.object["memberX"]
+    auto opDispatch(string part)() {
+        string fullname = name ~ '.' ~ part;
+
+        debug writeln("opdispatch ", fullname);
+        enforce(json.type == JSON_TYPE.OBJECT, "Expecting JSON.OBJECT, for " ~ fullname);
+
+        auto v = json.object[part];
+        return new Wrap(v, fullname);
     }
 
     string str() {
-        assert(json.type == JSON_TYPE.STRING);
+        enforce(json.type == JSON_TYPE.STRING, "Expecting JSON.STRING, for " ~ name);
         return json.str;
     }
     long integer() {
-        assert(json.type == JSON_TYPE.INTEGER);
+        enforce(json.type == JSON_TYPE.INTEGER, "Expecting JSON.INTEGER, for " ~ name);
         return json.integer;
     }
 
@@ -38,36 +44,9 @@ struct LocalRoots {
     string download;
 }
 
-void toto(string text) {
+void titi(){
     writeln('\n');
 
-    auto json = parseJSON(text);
-    auto obj = json.object;
-
-    auto localRoots = obj["localRoots"].object;
-    auto videos = localRoots["videos"];
-
-    writeln(to!string(obj));
-    writeln(typeid(obj), '\n');
-
-    writeln(to!string(videos));
-    writeln(videos.str);
-}
-
-void tata(string text) {
-    writeln('\n');
-
-    auto config = new Wrap(text);
-    auto localRoots = config.localRoots;
-    auto videos = localRoots.videos.str;
-    writeln(videos);
-//    auto s = videos.value; // asserts
-//    writeln(videos.integer); // asserts
-
-}
-
-int main(string[] args)
-{
     LocalRoots roots;
     auto ti = typeid(LocalRoots);
     writeln(ti);
@@ -75,12 +54,49 @@ int main(string[] args)
 
     auto bs = [ __traits(derivedMembers, LocalRoots) ];
     writeln(bs);
+}
 
-    string text = readText("config.json");
-    writeln(text);
+void toto(string text) {
+    writeln('\n');
 
-    toto(text);
-    tata(text);
+    auto json = parseJSON(text);
 
+    auto localRoots = json.object["localRoots"];
+    auto videos = localRoots.object["videos"];
+
+    writeln(to!string(videos));
+    writeln(videos.str);
+
+    //?? if we dont check the type, we get garbage from the union !
+    auto v = videos.integer;
+    writeln(v);
+}
+
+void tata(string text) {
+    writeln('\n');
+
+    auto config = new Wrap(text, "config");
+    auto localRoots = config.localRoots;
+    auto videos = localRoots.videos; //.str;
+    writeln(videos.str);
+//    auto s = videos.value; // exception
+//    writeln(videos.integer); // exception
+
+}
+
+int main(string[] args)
+{
+    try
+    {
+        string text = readText("config.json");
+        writeln(text);
+
+        titi();
+        toto(text);
+        tata(text);
+    }
+    catch (Exception ex) {
+        writeln("ooops exception: ", ex.msg);
+    }
 	return 0;
 }
