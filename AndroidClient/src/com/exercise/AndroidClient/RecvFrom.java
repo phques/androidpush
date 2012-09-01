@@ -1,5 +1,9 @@
 package com.exercise.AndroidClient;
 
+// AndroidPush project
+// Copyright 2012 Philippe Quesnel
+// Licensed under the Academic Free License version 3.0
+
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;

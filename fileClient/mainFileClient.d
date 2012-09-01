@@ -1,5 +1,9 @@
 module main;
 
+// AndroidPush project
+// Copyright 2012 Philippe Quesnel
+// Licensed under the Academic Free License version 3.0
+
 import std.stdio;
 import std.conv;
 import std.socket;

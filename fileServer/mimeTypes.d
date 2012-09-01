@@ -1,3 +1,6 @@
+// AndroidPush project
+// Copyright 2012 Philippe Quesnel
+// Licensed under the Academic Free License version 3.0
 module mimeTypes;
 
 import std.stdio;
