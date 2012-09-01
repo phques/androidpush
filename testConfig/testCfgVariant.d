@@ -13,42 +13,6 @@ import std.algorithm;
 import json; // probs w. std.json w. GDCm, use a local modif of it!!
 
 
-class Wrap {
-    JSONValue json;
-    string name;
-
-    this(string jsonString, string name) { this.name = name; this.json = parseJSON(jsonString); }
-    this(JSONValue json, string name) { this.name = name; this.json = json; }
-
-    // shortcut objWrap.memberX = objWrap.json.object["memberX"]
-    auto opDispatch(string part)() {
-        string fullname = name ~ '.' ~ part;
-
-        debug writeln("opdispatch ", fullname);
-        enforce(json.type == JSON_TYPE.OBJECT, "Expecting JSON.OBJECT, for " ~ fullname);
-
-        auto v = json.object[part];
-        return new Wrap(v, fullname);
-    }
-
-    string str() {
-        enforce(json.type == JSON_TYPE.STRING, "Expecting JSON.STRING, for " ~ name);
-        return json.str;
-    }
-    long integer() {
-        enforce(json.type == JSON_TYPE.INTEGER, "Expecting JSON.INTEGER, for " ~ name);
-        return json.integer;
-    }
-
-}
-
-struct LocalRoots {
-    string videos;
-    string music;
-    string pictures;
-    string download;
-}
-
 
 class Cfg {
     Variant[string] vals;
@@ -114,49 +78,6 @@ class Cfg {
 
 }
 
-
-/*void titi(){
-    writeln('\n');
-
-    LocalRoots roots;
-    auto ti = typeid(LocalRoots);
-    writeln(ti);
-    writeln(ti.offTi);
-
-    auto bs = [ __traits(derivedMembers, LocalRoots) ];
-    writeln(bs);
-}*/
-
-// direct access to JSONValue
-void directJson(string text) {
-    writeln("\ndirectJson");
-
-    auto json = parseJSON(text);
-
-    auto localRoots = json.object["localRoots"];
-    auto videos = localRoots.object["videos"];
-
-    writeln(to!string(videos));
-    writeln(videos.str);
-
-    //?? if we dont check the type, we get garbage from the union !
-    auto v = videos.integer;
-    writeln(v);
-}
-
-// using Wrap of JSONValue
-void testWrap(string text) {
-    writeln("\ntestWrap");
-
-    auto config = new Wrap(text, "config");
-    auto localRoots = config.localRoots;
-    auto videos = localRoots.videos; //.str;
-    writeln(videos.str);
-//    auto s = videos.value; // exception
-//    writeln(videos.integer); // exception
-
-}
-
 // test Cfg class w. Variants
 void testCfg(string text) {
     writeln("\ntestCfg");
@@ -177,16 +98,13 @@ void testCfg(string text) {
 //    writeln(cfg.localRoots.videos);
 }
 
+
 int main(string[] args)
 {
     try
     {
         string text = readText("config.json");
         writeln(text);
-
-//~         titi();
-        directJson(text);
-        testWrap(text);
         testCfg(text);
     }
     catch (Exception ex) {
