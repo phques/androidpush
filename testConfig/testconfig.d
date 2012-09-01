@@ -46,45 +46,6 @@ struct LocalRoots {
     string download;
 }
 
-/*void titi(){
-    writeln('\n');
-
-    LocalRoots roots;
-    auto ti = typeid(LocalRoots);
-    writeln(ti);
-    writeln(ti.offTi);
-
-    auto bs = [ __traits(derivedMembers, LocalRoots) ];
-    writeln(bs);
-}*/
-
-void toto(string text) {
-    writeln('\n');
-
-    auto json = parseJSON(text);
-
-    auto localRoots = json.object["localRoots"];
-    auto videos = localRoots.object["videos"];
-
-    writeln(to!string(videos));
-    writeln(videos.str);
-
-    //?? if we dont check the type, we get garbage from the union !
-    auto v = videos.integer;
-    writeln(v);
-}
-
-void tata(string text) {
-    writeln('\n');
-
-    auto config = new Wrap(text, "config");
-    auto localRoots = config.localRoots;
-    auto videos = localRoots.videos; //.str;
-    writeln(videos.str);
-//    auto s = videos.value; // exception
-//    writeln(videos.integer); // exception
-
-}
 
 class Cfg {
     Variant[string] vals;
@@ -151,8 +112,51 @@ class Cfg {
 }
 
 
-void test(string text) {
+/*void titi(){
     writeln('\n');
+
+    LocalRoots roots;
+    auto ti = typeid(LocalRoots);
+    writeln(ti);
+    writeln(ti.offTi);
+
+    auto bs = [ __traits(derivedMembers, LocalRoots) ];
+    writeln(bs);
+}*/
+
+// direct access to JSONValue
+void directJson(string text) {
+    writeln("\ndirectJson");
+
+    auto json = parseJSON(text);
+
+    auto localRoots = json.object["localRoots"];
+    auto videos = localRoots.object["videos"];
+
+    writeln(to!string(videos));
+    writeln(videos.str);
+
+    //?? if we dont check the type, we get garbage from the union !
+    auto v = videos.integer;
+    writeln(v);
+}
+
+// using Wrap of JSONValue
+void testWrap(string text) {
+    writeln("\ntestWrap");
+
+    auto config = new Wrap(text, "config");
+    auto localRoots = config.localRoots;
+    auto videos = localRoots.videos; //.str;
+    writeln(videos.str);
+//    auto s = videos.value; // exception
+//    writeln(videos.integer); // exception
+
+}
+
+// test Cfg class w. Variants
+void testCfg(string text) {
+    writeln("\ntestCfg");
     Cfg cfg = new Cfg(text);
     writeln(cfg["localRoots"]);
 
@@ -178,9 +182,9 @@ int main(string[] args)
         writeln(text);
 
 //~         titi();
-        toto(text);
-        tata(text);
-        test(text);
+        directJson(text);
+        testWrap(text);
+        testCfg(text);
     }
     catch (Exception ex) {
         writeln("ooops exception: ", ex.msg);
