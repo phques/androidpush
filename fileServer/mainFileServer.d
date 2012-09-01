@@ -1,5 +1,8 @@
-
+// AndroidPush project
+// Copyright 2012 Philippe Quesnel
+// Licensed under the Academic Free License version 3.0
 module main;
+
 
 import std.stdio;
 import std.file;
@@ -290,7 +293,7 @@ private:
 
             // write out 'progress bar' of percentage
             double percent = total * 100.0 / file.size;
-            if (percent != lastPercent) {
+            if (cast(uint)percent != cast(uint)lastPercent) {
                 uint nbCharsDone = cast(uint)(percent/100*ProgressBarLen);
                 line[0..nbCharsDone] = '=';
                 line[nbCharsDone..$] = '-';

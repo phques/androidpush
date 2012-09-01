@@ -1,4 +1,7 @@
 # AndroidPush IUP GUI LED file
+# AndroidPush project
+# Copyright 2012 Philippe Quesnel
+# Licensed under the Academic Free License version 3.0
 
 mainDialog = DIALOG[TITLE="Android Push", MINSIZE=300x300]
 (

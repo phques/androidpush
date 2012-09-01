@@ -1,5 +1,9 @@
 package com.exercise.AndroidClient;
 
+// AndroidPush project
+// Copyright 2012 Philippe Quesnel
+// Licensed under the Academic Free License version 3.0
+
 import java.io.IOException;
 import java.net.BindException;
 import java.net.DatagramPacket;
@@ -88,7 +92,7 @@ public class AndroidClient extends Activity {
 	
 	// AsyncTask that waits for a 'recvFrom' datagram (on Udp Socket) as a JSON object  
 	// then connects to server on PC to send a ACK message,
-	// then launches a download mgr download for the file
+	// then downloads the file
 	private class RecvFileAsyncTask extends AsyncTask<Void, Void, Void> {
 
 		private DatagramSocket udpSocket;

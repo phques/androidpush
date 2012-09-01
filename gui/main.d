@@ -1,8 +1,8 @@
-// main.d, test using IUP in D (with LED file)
-
+// AndroidPush project
 // Copyright 2012 Philippe Quesnel
 // Licensed under the Academic Free License version 3.0
 
+// main.d, test using IUP in D (with LED file)
 module main;
 
 import std.stdio;

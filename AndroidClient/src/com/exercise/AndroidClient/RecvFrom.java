@@ -1,5 +1,10 @@
 package com.exercise.AndroidClient;
 
+// AndroidPush project
+// Copyright 2012 Philippe Quesnel
+// Licensed under the Academic Free License version 3.0
+
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;

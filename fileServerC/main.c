@@ -1,3 +1,6 @@
+// AndroidPush project
+// Copyright 2012 Philippe Quesnel
+// Licensed under the Academic Free License version 3.0
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
