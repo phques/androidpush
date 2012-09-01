@@ -10,7 +10,8 @@ import std.exception;
 import std.variant;
 import std.algorithm;
 
-import json; // probs w. std.json w. GDCm, use a local modif of it!!
+//import json; // probs w. std.json w. GDCm, use a local modif of it!!
+import std.json;
 
 
 

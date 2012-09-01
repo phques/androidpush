@@ -10,7 +10,8 @@ import std.array;
 import std.file;
 import std.exception;
 
-import json; // probs w. std.json w. GDCm, use a local modif of it!!
+//import json; // probs w. std.json w. GDCm, use a local modif of it!!
+import std.json;
 
 
 class Wrap {
