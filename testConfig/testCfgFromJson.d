@@ -92,10 +92,15 @@ class Config : FromJson {
 void testConfig(string text) {
     writeln("\ntestCfg");
     auto json = new Wrap(text, "config");
+
     Config cfg = new Config;
     json.fromJson(cfg);
-
     writeln(cfg);
+
+    cfg = new Config;
+    cfg.fromJson(json);
+    writeln(cfg);
+
 }
 
 int main(string[] args)
