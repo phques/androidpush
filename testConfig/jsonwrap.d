@@ -38,6 +38,16 @@ class Wrap {
         enforce(json.type == JSON_TYPE.INTEGER, "Expecting JSON.INTEGER, for " ~ name);
         return json.integer;
     }
+    bool boolean() {
+        switch (json.type) {
+            case JSON_TYPE.TRUE: return true;
+            case JSON_TYPE.FALSE: return false;
+            default: break;
+        }
+        enforce(false, "Expecting JSON.TRUE/FALSE, for " ~ name);
+        return false; // keep compiler from complaining ;-)
+    }
+
     JSONValue[string] object() {
         enforce(json.type == JSON_TYPE.OBJECT, "Expecting JSON.OBJECT, for " ~ name);
         return json.object;

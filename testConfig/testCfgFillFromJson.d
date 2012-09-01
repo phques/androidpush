@@ -46,6 +46,9 @@ void Fill(Class)(ref Class obj, Wrap json) {
             else static if (is(typeof(__traits(getMember, obj, m)) == long)) {
                 __traits(getMember, obj, m) = json[m].integer;
             }
+            else static if (is(typeof(__traits(getMember, obj, m)) == bool)) {
+                __traits(getMember, obj, m) = json[m].boolean;
+            }
             else static if (is(typeof(__traits(getMember, obj, m)) == class)) {
                 Fill(__traits(getMember, obj, m), json[m]);  // object, recurse
             }
@@ -87,6 +90,10 @@ void Fill(Class)(ref Class obj, JSONValue json) {
                 debug writeln("  assigning int to ", m);
                 __traits(getMember, obj, m) = json.object[m].integer;
             }
+            else static if (is(typeof(__traits(getMember, obj, m)) == bool)) {
+                debug writeln("  assigning bool to ", m);
+                __traits(getMember, obj, m) = json.object[m].type == JSON_TYPE.TRUE;
+            }
             else static if (is(typeof(__traits(getMember, obj, m)) == class)) {
                 debug writeln("  recursing on object");
                 Fill(__traits(getMember, obj, m), json.object[m]);
@@ -109,12 +116,18 @@ class Config {
     LocalRoots localRoots;
     string lastRoot;
     float dummy; // if we have an actual entry 'dummy' in json, will assert 'unsupported type'
+    bool flag;
 
     this() { localRoots = new LocalRoots; }
 
     override string toString() {
         auto writer = appender!string();
-        formattedWrite(writer, "Config{\n%s\nlastRoot:%s\n}", localRoots.toString, lastRoot);
+        formattedWrite(writer,
+            "Config{\n%s\n"
+            "lastRoot:%s\n"
+            "flag:%s\n"
+            "}",
+            localRoots.toString, lastRoot, flag);
         return writer.data;
     }
 }
