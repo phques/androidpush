@@ -20,13 +20,13 @@ void directJson(string text) {
     auto json = parseJSON(text);
 
     auto localRoots = json.object["localRoots"];
-    auto videos = localRoots.object["videos"];
+    auto movies = localRoots.object["movies"];
 
-    writeln(to!string(videos));
-    writeln(videos.str);
+    writeln(to!string(movies));
+    writeln(movies.str);
 
     //?? if we dont check the type, we get garbage from the union !
-    auto v = videos.integer;
+    auto v = movies.integer;
     writeln(v);
 }
 

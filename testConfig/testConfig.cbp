@@ -40,6 +40,8 @@
 			<Option compile="0" />
 			<Option link="0" />
 		</Unit>
+		<Unit filename="jsonwrap.d" />
+		<Unit filename="testCfgFillFromJson.d" />
 		<Unit filename="testCfgFromJson.d">
 			<Option compile="0" />
 			<Option link="0" />
@@ -52,7 +54,10 @@
 			<Option compile="0" />
 			<Option link="0" />
 		</Unit>
-		<Unit filename="testJsonWrap.d" />
+		<Unit filename="testJsonWrap.d">
+			<Option compile="0" />
+			<Option link="0" />
+		</Unit>
 		<Unit filename="testconfig.d">
 			<Option compile="0" />
 			<Option link="0" />

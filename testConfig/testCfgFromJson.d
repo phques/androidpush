@@ -12,63 +12,32 @@ import std.exception;
 
 //import json; // probs w. std.json w. GDCm, use a local modif of it!!
 import std.json;
+import jsonwrap;
 
-
-class Wrap {
-    JSONValue json;
-    string name;
-
-    this(string jsonString, string name) { this.name = name; this.json = parseJSON(jsonString); }
-    this(JSONValue json, string name) { this.name = name; this.json = json; }
-
-    // shortcut objWrap.memberX = objWrap.json.object["memberX"]
-    auto opDispatch(string part)() {
-        string fullname = name ~ '.' ~ part;
-
-        debug writeln("opdispatch ", fullname);
-        enforce(json.type == JSON_TYPE.OBJECT, "Expecting JSON.OBJECT, for " ~ fullname);
-
-        auto v = json.object[part];
-        return new Wrap(v, fullname);
-    }
-
-    string str() {
-        enforce(json.type == JSON_TYPE.STRING, "Expecting JSON.STRING, for " ~ name);
-        return json.str;
-    }
-    long integer() {
-        enforce(json.type == JSON_TYPE.INTEGER, "Expecting JSON.INTEGER, for " ~ name);
-        return json.integer;
-    }
-
-    void fromJson(FromJson obj) {
-        obj.fromJson(this);
-    }
-}
 
 interface FromJson {
     void fromJson(Wrap json);
 }
 
 class LocalRoots : FromJson {
-    string videos;
+    string movies;
     string music;
     string pictures;
-    string download;
+    string downloads;
 
     public void fromJson(Wrap json) {
-        videos = json.videos.str;
+        movies = json.movies.str;
         music = json.music.str;
         pictures = json.pictures.str;
-        download = json.download.str;
+        downloads = json.downloads.str;
     }
 
     override string toString() {
         auto writer = appender!string();
-        formattedWrite(writer, "videos=%s\n", videos);
+        formattedWrite(writer, "movies=%s\n", movies);
         formattedWrite(writer, "music=%s\n", music);
         formattedWrite(writer, "pictures=%s\n", pictures);
-        formattedWrite(writer, "download=%s\n", download);
+        formattedWrite(writer, "downloads=%s\n", downloads);
         return writer.data;
     }
 }
@@ -91,14 +60,9 @@ class Config : FromJson {
 
 
 void testConfig(string text) {
-    writeln("\ntestCfg");
     auto json = new Wrap(text, "config");
 
     Config cfg = new Config;
-    json.fromJson(cfg);
-    writeln(cfg);
-
-    cfg = new Config;
     cfg.fromJson(json);
     writeln(cfg);
 

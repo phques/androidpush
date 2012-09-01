@@ -89,14 +89,14 @@ void testCfg(string text) {
     writeln(to!string(typeid(roots)), roots.type);
 
     auto r = roots.get!Cfg();
-    writeln(r["videos"]);
+    writeln(r["movies"]);
 
 //    Cfg r2 = roots.get();
-//    writeln(r2["videos"]);
+//    writeln(r2["movies"]);
 
 //    writeln(cfg.localRoots);
-//    writeln(cfg["localRoots"]["videos"]);
-//    writeln(cfg.localRoots.videos);
+//    writeln(cfg["localRoots"]["movies"]);
+//    writeln(cfg.localRoots.movies);
 }
 
 

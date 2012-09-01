@@ -1,8 +1,11 @@
 {
+  "lastRoot" : "music",
+  "dummy" : 12.0,
   "localRoots" : {
     "music" : "",
-    "videos" : "/home/kwez/videos",
-    "download" : "",
-    "pictures" : ""
+    "downloads" : "",
+    "pictures" : "",
+    "movies" : "/home/kwez/videos",
+    "inumber" : 10
   }
 }

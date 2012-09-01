@@ -50,13 +50,13 @@ interface FromJson {
 }
 
 class LocalRoots : FromJson {
-    string videos;
+    string movies;
     string music;
     string pictures;
     string download;
 
     void fromJson(Wrap json) {
-        videos = json.videos.str;
+        movies = json.movies.str;
         music = json.music.str;
         pictures = json.pictures.str;
         download = json.download.str;
@@ -157,13 +157,13 @@ void directJson(string text) {
     auto json = parseJSON(text);
 
     auto localRoots = json.object["localRoots"];
-    auto videos = localRoots.object["videos"];
+    auto movies = localRoots.object["movies"];
 
-    writeln(to!string(videos));
-    writeln(videos.str);
+    writeln(to!string(movies));
+    writeln(movies.str);
 
     //?? if we dont check the type, we get garbage from the union !
-    auto v = videos.integer;
+    auto v = movies.integer;
     writeln(v);
 }
 
@@ -173,10 +173,10 @@ void testWrap(string text) {
 
     auto config = new Wrap(text, "config");
     auto localRoots = config.localRoots;
-    auto videos = localRoots.videos; //.str;
-    writeln(videos.str);
-//    auto s = videos.value; // exception
-//    writeln(videos.integer); // exception
+    auto movies = localRoots.movies; //.str;
+    writeln(movies.str);
+//    auto s = movies.value; // exception
+//    writeln(movies.integer); // exception
 
 }
 
@@ -190,14 +190,14 @@ void testCfg(string text) {
     writeln(to!string(typeid(roots)), roots.type);
 
     auto r = roots.get!Cfg();
-    writeln(r["videos"]);
+    writeln(r["movies"]);
 
 //    Cfg r2 = roots.get();
-//    writeln(r2["videos"]);
+//    writeln(r2["movies"]);
 
 //    writeln(cfg.localRoots);
-//    writeln(cfg["localRoots"]["videos"]);
-//    writeln(cfg.localRoots.videos);
+//    writeln(cfg["localRoots"]["movies"]);
+//    writeln(cfg.localRoots.movies);
 }
 
 void testConfig(string text) {
