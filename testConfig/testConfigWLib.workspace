@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_workspace_file>
+	<Workspace title="testConfigWLib">
+		<Project filename="testConfigWLib.cbp">
+			<Depends filename="../../kwezd.git/kwezd/kwezd.cbp" />
+		</Project>
+		<Project filename="../../kwezd.git/kwezd/kwezd.cbp" />
+	</Workspace>
+</CodeBlocks_workspace_file>
