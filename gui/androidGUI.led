@@ -3,15 +3,9 @@
 # Copyright 2012 Philippe Quesnel
 # Licensed under the Academic Free License version 3.0
 
-mainDialog = DIALOG[TITLE="Android Push", MINSIZE=300x300]
+mainDialog = DIALOG[TITLE="Android Push", MINSIZE=240x340]
 (
   vbox[NMARGIN=5x5, NGAP=5x5, EXPAND=YES](
-
-    frame[TITLE="Local Root"](
-      vbox[NMARGIN=5x2, EXPAND=HORIZONTAL](
-        localRoot = text[EXPAND=HORIZONTAL, MARGIN=5](do_nothing)
-      )
-    ),
 
     frame[TITLE="Destination"](
       vbox[NMARGIN=5x5, EXPAND=YES](
@@ -19,8 +13,22 @@ mainDialog = DIALOG[TITLE="Android Push", MINSIZE=300x300]
           label("Root"),
           destinationRoots = list[DROPDOWN="YES", EXPAND=HORIZONTAL](rootCB)
         ),
-        fill[SIZE=4](),
+        #fill[SIZE=4](),
         vbox(
+          label("Subdir"),
+          destSubdir = text[EXPAND=HORIZONTAL, MARGIN=5](do_nothing)
+        )
+      )
+    ),
+
+    frame[TITLE="Local"](
+      vbox[NMARGIN=5x5, EXPAND=YES](
+        vbox(
+          label("Root"),
+          localRoot = text[EXPAND=HORIZONTAL, MARGIN=5](do_nothing)
+        ),
+        fill[SIZE=4](),
+        vbox[EXPAND=YES](
           label("Files"),
           files = list[EXPAND=YES](do_nothing)
         )
