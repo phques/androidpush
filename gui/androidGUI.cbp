@@ -11,7 +11,6 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gdc" />
-				<Option use_console_runner="0" />
 				<Compiler>
 					<Add option="-funittest" />
 					<Add option="-g" />
@@ -19,6 +18,7 @@
 				</Compiler>
 				<Linker>
 					<Add directory="$(#iupd.lib)/bin/Debug" />
+					<Add directory="$(#kwezd.lib)/bin/Debug" />
 				</Linker>
 			</Target>
 			<Target title="Release">
@@ -32,20 +32,25 @@
 				<Linker>
 					<Add option="-s" />
 					<Add directory="$(#iupd.lib)/bin/Release" />
+					<Add directory="$(#kwezd.lib)/bin/Release" />
 				</Linker>
 			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
 			<Add directory="$(#iupd.include)" />
+			<Add directory="$(#kwezd.include)" />
 		</Compiler>
 		<Linker>
 			<Add library="iup" />
 			<Add library="iupcontrols" />
 			<Add library="iupd" />
+			<Add library="kwezd" />
 			<Add directory="$(#iup.lib)" />
 		</Linker>
 		<Unit filename="androidGUI.led" />
+		<Unit filename="config.d" />
+		<Unit filename="config.json" />
 		<Unit filename="loadledc.d" />
 		<Unit filename="main.d" />
 		<Extensions>

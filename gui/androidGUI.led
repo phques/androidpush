@@ -6,18 +6,18 @@
 mainDialog = DIALOG[TITLE="Android Push", MINSIZE=300x300]
 (
   vbox[NMARGIN=5x5, NGAP=5x5, EXPAND=YES](
-  
+
     frame[TITLE="Local Root"](
       vbox[NMARGIN=5x2, EXPAND=HORIZONTAL](
         localRoot = text[EXPAND=HORIZONTAL, MARGIN=5](do_nothing)
       )
     ),
-    
+
     frame[TITLE="Destination"](
       vbox[NMARGIN=5x5, EXPAND=YES](
         vbox(
           label("Root"),
-          destinationRoot = list[1="aa",2="bb",3="cc", DROPDOWN="YES", EXPAND=HORIZONTAL](do_nothing)
+          destinationRoots = list[DROPDOWN="YES", EXPAND=HORIZONTAL](rootCB)
         ),
         fill[SIZE=4](),
         vbox(
@@ -26,7 +26,7 @@ mainDialog = DIALOG[TITLE="Android Push", MINSIZE=300x300]
         )
       )
     ),
-    
+
     hbox[EXPAND=HORIZONTAL, MARGIN=5x2](
       fill(),
       pushButton = button[PADDING=4x1]("Push", onPushButton)

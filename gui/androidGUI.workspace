@@ -3,7 +3,9 @@
 	<Workspace title="androidGUI">
 		<Project filename="androidGUI.cbp">
 			<Depends filename="../../IupD.git/iup/iupdlib.cbp" />
+			<Depends filename="../../kwezd.git/kwezd/kwezd.cbp" />
 		</Project>
 		<Project filename="../../IupD.git/iup/iupdlib.cbp" />
+		<Project filename="../../kwezd.git/kwezd/kwezd.cbp" />
 	</Workspace>
 </CodeBlocks_workspace_file>
