@@ -17,6 +17,7 @@
 				</Compiler>
 				<Linker>
 					<Add directory="$(#iupd.lib)\bin\Debug" />
+					<Add directory="$(#kwezd.lib)\bin\Debug" />
 				</Linker>
 			</Target>
 			<Target title="Release">
@@ -30,6 +31,7 @@
 				<Linker>
 					<Add option="-s" />
 					<Add directory="$(#iupd.lib)\bin\Release" />
+					<Add directory="$(#kwezd.lib)\bin\Release" />
 				</Linker>
 			</Target>
 		</Build>
@@ -37,12 +39,14 @@
 			<Add option="-Wall" />
 			<Add option="-m32" />
 			<Add directory="$(#iupd.include)" />
+			<Add directory="$(#kwezd.include)" />
 		</Compiler>
 		<Linker>
 			<Add option="-m32" />
 			<Add library="iupd" />
 			<Add library="iup" />
 			<Add library="iupcontrols" />
+			<Add library="kwezd" />
 			<Add directory="$(#iup.lib)" />
 		</Linker>
 		<Unit filename="androidGUI.led" />
@@ -50,6 +54,8 @@
 		<Unit filename="androidGUI.rc">
 			<Option compilerVar="WINDRES" />
 		</Unit>
+		<Unit filename="config.d" />
+		<Unit filename="config.json" />
 		<Unit filename="loadledc.d" />
 		<Unit filename="main.d" />
 		<Extensions>
