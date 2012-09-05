@@ -24,12 +24,17 @@ import config;
 
 class MainWindow : IupWidget {
 
-    IupWidget destinationRoots;
-    IupWidget localRoot;
+    IupWidget destRootsList;
+    IupWidget localRootEdit;
+    IupWidget filesList;
+
     Config config;
     JsonWrap jsonCfg;
 
     string[] rootsType = ["dummy0", "music", "pictures", "movies", "downloads"];
+
+    string[] droppedFiles;
+
 
     this() {
         /* loads LED 'resource' file */
@@ -49,25 +54,35 @@ class MainWindow : IupWidget {
 
     void getWidgets() {
         // get 'handle' on widgets by name
-        destinationRoots = new IupWidget("destinationRoots");
-        localRoot = new IupWidget("localRoot");
+        destRootsList = new IupWidget("destinationRoots");
+        localRootEdit = new IupWidget("localRoot");
+        filesList = new IupWidget("files");
+    }
+
+    static extern(C) int testcb(Ihandle *self, const char* filename, int num, int x, int y) {
+        writefln("testcb %s, %s, %s, %s", to!string(filename), num,x,y);
+        return IUP_DEFAULT;
     }
 
     void setupWidgets(){
         setupDestRoots();
+
+//        filesList["DROPTARGET"] = "yes";
+        filesList.setDelegate(&this.fileDndCB, "DROPFILES_CB");
+//        IupSetCallback(*filesList, "DROPFILES_CB", cast(Icallback)&testcb);
     }
 
     void setupDestRoots() {
         // fill dest roots list
         foreach (idx, val; rootsType)
             if (idx > 0)
-                destinationRoots[to!string(idx)] = val;
+                destRootsList[to!string(idx)] = val;
 
         // select 1st entry
-        destinationRoots["VALUE"] = "1";
+        destRootsList["VALUE"] = "1";
         setLocalRootFromDestRoot(rootsType[1]);
 
-        destinationRoots.setDelegateSII(&this.rootsCB);
+        destRootsList.setDelegate(&this.rootsCB);
     }
 
     void loadConfig() {
@@ -84,7 +99,7 @@ class MainWindow : IupWidget {
     // ie: = config[selected='music']
     void setLocalRootFromDestRoot(string itemText) {
         auto newVal = jsonCfg.localRoots[itemText].str;
-        localRoot["VALUE"] = newVal;
+        localRootEdit["VALUE"] = newVal;
     }
 
     // destRoots list callback
@@ -98,6 +113,30 @@ class MainWindow : IupWidget {
     }
 
 
+    // gather all dropped files into droppedFiles[],
+    // when last is dropped, process
+    int fileDndCB(Ihandle *self, char* text, int num, int x, int y) {
+        string filename = to!string(text);
+
+        droppedFiles ~= filename;
+
+        if (num == 0)
+            processDroppedFilenames();
+
+        return IUP_DEFAULT;
+    }
+
+    void processDroppedFilenames() {
+        filesList["1"] = NULL; // remove all
+
+        foreach (i, filename; droppedFiles) {
+            writeln("file: ", filename);
+            filesList[to!string(i+1)] = filename;
+        }
+
+        // clear droppedFiles
+        droppedFiles.length = 0;
+    }
 }
 
 //---------------------
