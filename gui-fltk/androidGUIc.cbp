@@ -12,7 +12,7 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Option use_console_runner="0" />
-				<Option parameters="-scheme none  -scheme gtk+   -scheme plastic" />
+				<Option parameters="-scheme none    -scheme gtk+  -scheme plastic" />
 				<Compiler>
 					<Add option="-g" />
 				</Compiler>
