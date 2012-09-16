@@ -58,6 +58,7 @@ class AndroidHttpPush
 
         getopt(args,
             "androidUdpPort", &androidUdpPort,
+            "udpHost", &udpHost,
             "localHttpPort", &localHttpPort,
             "destDirType", &destDirType,
             "destSubdir", &destSubdir,
@@ -72,6 +73,7 @@ class AndroidHttpPush
     {
         writeln("usage:");
         writeln("  --androidUdpPort");
+        writeln("  --udpHost");
         writeln("  --localHttpPort");
         writeln("  --destDirType");
         writeln("  --destSubdir");
@@ -82,7 +84,7 @@ class AndroidHttpPush
     {
         try
         {
-            debug {
+            version(debug_) {
                 enum NbRetries = 1;
                 enum NbSecWait = 0;
             }
@@ -186,7 +188,8 @@ private:
         Socket udpSocket = new UdpSocket;
         scope(exit) { udpSocket.close(); }
 
-        auto remoteAddr = new InternetAddress("192.168.1.255", androidUdpPort);
+//        auto remoteAddr = new InternetAddress("192.168.1.255", androidUdpPort);
+        auto remoteAddr = new InternetAddress(udpHost, androidUdpPort);
         udpSocket.setOption(SocketOptionLevel.SOCKET, SocketOption.BROADCAST, true);
 
         // build the recvFrom JSON object string to send
@@ -317,6 +320,7 @@ private:
 private:
     ushort androidUdpPort = 4444;
     ushort localHttpPort = 8080; // 80 not allowed on my ubuntu ;-p
+    string udpHost = "192.168.1.255"; // broadcast local net
     string destDirType = "";
     string destSubdir = "";
     string filePath;
