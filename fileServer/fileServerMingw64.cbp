@@ -11,7 +11,7 @@
 				<Option object_output="obj\Debug\" />
 				<Option type="1" />
 				<Option compiler="gnu_gdc_d_compiler_tdm_mingw64" />
-				<Option parameters="--androidUdpPort=4444 --localHttpPort=8080 --destDirType=downloads --destSubdir=androidPush --file=data/yoga.flv" />
+				<Option parameters="--udpHost=localhost --androidUdpPort=4444 --localHttpPort=8080 --destDirType=downloads --destSubdir=androidPush --file=obj\Debug\mainFileServer.o" />
 				<Compiler>
 					<Add option="-g" />
 					<Add option="-fdebug" />
@@ -30,9 +30,14 @@
 				</Linker>
 			</Target>
 		</Build>
+		<Compiler>
+			<Add option="-m32" />
+		</Compiler>
 		<Linker>
+			<Add option="-m32" />
 			<Add library="ws2_32" />
 		</Linker>
+		<Unit filename="json.d" />
 		<Unit filename="mainFileServer.d" />
 		<Unit filename="mimeTypes.d" />
 		<Extensions>
