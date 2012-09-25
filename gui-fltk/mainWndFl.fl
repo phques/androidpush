@@ -1,0 +1,94 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0300 
+header_name {.h} 
+code_name {.cxx}
+comment {// Copyright 2012 Philippe Quesnel
+// Licensed under the Academic Free License version 3.0
+} {in_source in_header
+} 
+
+class MainWindowFl {open
+} {
+  Function {MainWindowFl()} {open
+  } {
+    Fl_Window window {
+      label {Android Push} open
+      protected xywh {134 484 255 375} type Double align 80 resizable
+      code0 {window->size_range(window->w(), window->h());} visible
+    } {
+      Fl_Group {} {
+        label Destination open
+        xywh {15 25 224 110} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL
+      } {
+        Fl_Box {} {
+          label Root
+          xywh {20 31 55 19} labelfont 2 align 20
+        }
+        Fl_Choice rootDestChoice {open
+          xywh {24 49 207 25} down_box BORDER_BOX labeltype NO_LABEL
+        } {}
+        Fl_Box {} {
+          label Subdir
+          xywh {20 78 75 19} labelfont 2 align 20
+        }
+        Fl_Input subdirInput {
+          xywh {24 98 207 25}
+        }
+        Fl_Box {} {
+          label foresize
+          xywh {105 30 95 15} hide resizable
+        }
+      }
+      Fl_Group {} {
+        label Local
+        xywh {15 159 224 172} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL resizable
+      } {
+        Fl_Box {} {
+          label Root
+          xywh {20 167 54 19} labelfont 2 align 20
+        }
+        Fl_Input localRootInput {
+          xywh {24 187 207 25}
+        }
+        Fl_Box {} {
+          label Files
+          xywh {20 219 54 19} labelfont 2 align 20
+        }
+        Fl_Browser filesBrowser {
+          xywh {24 239 207 85} resizable
+        }
+        Fl_Box {} {
+          label foresize
+          xywh {125 165 95 15} hide
+        }
+      }
+      Fl_Group {} {open
+        xywh {10 339 238 29}
+      } {
+        Fl_Button {} {
+          label {Push  @-2<-}
+          xywh {145 339 96 28} labeltype EMBOSSED_LABEL labelfont 3 labelsize 15 labelcolor 27
+        }
+        Fl_Box {} {
+          label foresize
+          xywh {50 345 50 15} hide resizable
+        }
+      }
+    }
+  }
+  Function {~MainWindowFl()} {return_type virtual
+  } {
+    code {puts("~mainWndFl");
+if (window)
+  delete window;
+window = 0;} {}
+  }
+  Function {show(int argc, char ** argv)} {return_type virtual
+  } {
+    code {window->show(argc, argv);} {}
+  }
+  Function {hide()} {return_type virtual
+  } {
+    code {window->hide();} {}
+  }
+} 

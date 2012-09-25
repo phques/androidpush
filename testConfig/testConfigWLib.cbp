@@ -2,23 +2,26 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="fileServer" />
+		<Option title="testConfigWLib" />
 		<Option pch_mode="2" />
 		<Option compiler="gdc" />
 		<Build>
 			<Target title="Debug">
-				<Option output="bin/Debug/fileServer" prefix_auto="1" extension_auto="1" />
+				<Option output="bin/Debug/testConfig" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gdc" />
-				<Option parameters="--androidUdpPort=4444  --localPort=4445  --destDirType=downloads  --destSubdir=androidPush  --file=data/UnJourUneFois.wmv" />
 				<Compiler>
 					<Add option="-g" />
 					<Add option="-fdebug" />
 				</Compiler>
+				<Linker>
+					<Add option="-fdebug" />
+					<Add directory="$(#kwezd.lib)/Debug" />
+				</Linker>
 			</Target>
 			<Target title="Release">
-				<Option output="bin/Release/fileServer" prefix_auto="1" extension_auto="1" />
+				<Option output="bin/Release/testConfig" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Release/" />
 				<Option type="1" />
 				<Option compiler="gdc" />
@@ -27,20 +30,33 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add directory="$(#kwezd.lib)/Release" />
 				</Linker>
 			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
+			<Add directory="$(#kwezd.include)" />
 		</Compiler>
-		<Unit filename="json.d" />
-		<Unit filename="mainFileServer.d" />
-		<Unit filename="mimeTypes.d" />
+		<Linker>
+			<Add library="kwezd" />
+		</Linker>
+		<Unit filename="config.json" />
+		<Unit filename="testCfgFillJsonWLib.d" />
 		<Extensions>
 			<code_completion />
 			<envvars />
 			<debugger />
 			<lib_finder disable_auto="1" />
+			<DoxyBlocks>
+				<comment_style block="0" line="0" />
+				<doxyfile_project />
+				<doxyfile_build />
+				<doxyfile_warnings />
+				<doxyfile_output />
+				<doxyfile_dot />
+				<general />
+			</DoxyBlocks>
 		</Extensions>
 	</Project>
 </CodeBlocks_project_file>

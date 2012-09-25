@@ -1,0 +1,8 @@
+{
+  "localRoots" : {
+    "music" : "/home/kwez/Music",
+    "downloads" : "/home/kwez/Downloads",
+    "pictures" : "/home/kwez/Pictures",
+    "movies" : "/home/kwez/Videos"
+  }
+}
