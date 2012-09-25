@@ -1,6 +1,7 @@
 *.[oa]
 *.layout
 *.depend
+*.class
 *~
 obj/
 bin/

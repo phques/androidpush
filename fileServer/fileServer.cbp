@@ -11,7 +11,7 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gdc" />
-				<Option parameters="--androidUdpPort=4444  --localHttpPort=8080  --destDirType=downloads  --destSubdir=androidPush  --file=data/yoga.flv" />
+				<Option parameters="--androidUdpPort=4444  --localPort=4445  --destDirType=downloads  --destSubdir=androidPush  --file=data/UnJourUneFois.wmv" />
 				<Compiler>
 					<Add option="-g" />
 					<Add option="-fdebug" />
@@ -33,6 +33,7 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
+		<Unit filename="json.d" />
 		<Unit filename="mainFileServer.d" />
 		<Unit filename="mimeTypes.d" />
 		<Extensions>

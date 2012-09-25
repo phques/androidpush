@@ -21,7 +21,7 @@ import std.datetime;
 
 import mimeTypes;
 
-class AndroidHttpPush
+class AndroidPush
 {
     private void handleFileParam(string opt, string fileParam)
     {
@@ -60,7 +60,7 @@ class AndroidHttpPush
         getopt(args,
             "androidUdpPort", &androidUdpPort,
             "udpHost", &udpHost,
-            "localHttpPort", &localHttpPort,
+            "localPort", &localPort,
             "destDirType", &destDirType,
             "destSubdir", &destSubdir,
             "file", &handleFileParam
@@ -75,7 +75,7 @@ class AndroidHttpPush
         writeln("usage:");
         writeln("  --androidUdpPort");
         writeln("  --udpHost");
-        writeln("  --localHttpPort");
+        writeln("  --localPort");
         writeln("  --destDirType");
         writeln("  --destSubdir");
         writeln("  --file");
@@ -181,7 +181,7 @@ private:
     }
 
     // send a 'recvFrom' command as a broadcast udp datagram to android client,
-    // when it recvs it it then connects to us to get the file (HTTP GET)
+    // when it recvs it it then connects to us to get the file
     // ## Throws
     bool sendUdpPacket()
     {
@@ -194,7 +194,7 @@ private:
         udpSocket.setOption(SocketOptionLevel.SOCKET, SocketOption.BROADCAST, true);
 
         // build the recvFrom JSON object string to send
-        string msg = makeRecvFromJson(localHttpPort, destDirType, destSubdir, baseFilename,
+        string msg = makeRecvFromJson(localPort, destDirType, destSubdir, baseFilename,
                                       fileLength, pushId);
 
 
@@ -222,7 +222,7 @@ private:
         assert(listener.isAlive);
         scope(exit) listener.close();
 
-        auto address = new InternetAddress(localHttpPort);
+        auto address = new InternetAddress(localPort);
         listener.setOption(SocketOptionLevel.SOCKET, SocketOption.REUSEADDR, true);
         listener.bind(address);
         listener.listen(1);
@@ -320,8 +320,9 @@ private:
 
 private:
     ushort androidUdpPort = 4444;
-    ushort localHttpPort = 8080; // 80 not allowed on my ubuntu ;-p
-    string udpHost = "192.168.1.255"; // broadcast local net
+    ushort localPort = 4445;
+//    string udpHost = "192.168.1.255"; // broadcast local net .. mine, at home ;-)
+    string udpHost = "255.255.255.255"; // broadcast, dont need to know local net
     string destDirType = "";
     string destSubdir = "";
     string filePath;
@@ -337,16 +338,16 @@ private:
 
 int main(string[] args)
 {
-    AndroidHttpPush androidPush;
+    AndroidPush androidPush;
     try
     {
-        androidPush = new AndroidHttpPush(args);
+        androidPush = new AndroidPush(args);
         androidPush.run();
     }
     catch (Exception ex)
     {
         writeln("ooops, ", ex.msg);
-        AndroidHttpPush.showUsage();
+        AndroidPush.showUsage();
     }
 
     // put breakpt here when in debugger, since terminal wont wait for Enter
