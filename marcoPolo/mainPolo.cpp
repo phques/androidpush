@@ -1,6 +1,7 @@
-//#include <cstdlib>
-//#include <cstring>
-//#include <iostream>
+// AndroidPush project
+// Copyright 2012 Philippe Quesnel
+// Licensed under the Academic Free License version 3.0
+// -- mainPolo.cpp --
 #include <boost/asio.hpp>
 #include "marcoPolo.h"
 

@@ -1,3 +1,6 @@
+// AndroidPush project
+// Copyright 2012 Philippe Quesnel
+// Licensed under the Academic Free License version 3.0
 'marco polo': 
 my own mini zero-configuration networking (just two 'hardcoded' udp ports ;-p). 
 

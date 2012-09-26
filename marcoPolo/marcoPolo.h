@@ -1,3 +1,7 @@
+// AndroidPush project
+// Copyright 2012 Philippe Quesnel
+// Licensed under the Academic Free License version 3.0
+//--marcoPolo.h --
 #ifndef MARCO_H
 #define MARCO_H
 
