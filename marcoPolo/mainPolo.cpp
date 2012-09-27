@@ -25,8 +25,13 @@ int main(int argc, char* argv[])
 
     MarcoPolo marcoPolo(io_service, "testMarcoPolo");
 
-    unsigned short poloListenTcpPort = 0;
-    std::cout << marcoPolo.polo(poloListenTcpPort) << std::endl;
+    unsigned short poloListenTcpPort = 1234; // would be the port of the socket we do listen() with
+    bool ok = false;
+    while (!ok)
+    {
+        ok = marcoPolo.polo(poloListenTcpPort);
+        std::cout << ok << std::endl;
+    }
   }
   catch (std::exception& e)
   {

@@ -21,7 +21,7 @@ class MarcoPolo
         boost::asio::ip::udp::endpoint poloEndpoint() { return response_endpoint; }
 
     private:
-        std::string recv(boost::asio::ip::udp::socket& sock);
+        std::string recv(boost::asio::ip::udp::socket& sock, boost::asio::ip::udp::endpoint& response_endpoint);
         std::string marcoMsg();
         std::string poloMsg(unsigned short poloListenTcpPort);
 
