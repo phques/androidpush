@@ -47,7 +47,11 @@ string MarcoPolo::poloMsg(unsigned short poloTcpPort)
 
 bool MarcoPolo::marco()
 {
-    //--- send --
+    //##TODO: loop on whole thing (re-send & recv, if no answer from polo
+    //      ie- do recv w. timeout, re-send marco & get response etc...
+    //          will need to use async_send_to for this !
+
+    //--- send marco --
     udp::socket sock(ioService, udp::endpoint(udp::v4(), 0));
     socket_base::broadcast option(true);
     sock.set_option(option);
@@ -61,7 +65,9 @@ bool MarcoPolo::marco()
 
     sock.send_to(boost::asio::buffer(marcoMsg), remoteEndpt);
 
-    //-- recv --
+    // ## TODO: loop if not the correct response (could be a different polo or just some other app)
+
+    //-- recv polo response --
     string reply = recv(sock);
 
     //##debug
@@ -77,6 +83,7 @@ bool MarcoPolo::marco()
     {
         if (responseParts[0] == "polo" && responseParts[1] == poloName)
         {
+            //##TODO: check that all digits string / convert to unsigned short
             poloResponsePort_ = responseParts[2];
             ret = true;
         }
