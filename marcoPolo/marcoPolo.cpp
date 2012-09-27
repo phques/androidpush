@@ -2,16 +2,23 @@
 // Copyright 2012 Philippe Quesnel
 // Licensed under the Academic Free License version 3.0
 //--marcoPolo.cpp --
+#include "stdafx.h"
+#include <boost/algorithm/string/classification.hpp>
 #include "marcoPolo.h"
 
+//#include <boost/algorithm/string/classification.hpp>
+
 using namespace boost::asio;
+using namespace boost::algorithm;
+using namespace std;
 
 using boost::asio::ip::udp;
 
 enum { max_length = 1024 };
+const char* MSG_SEPAR = "|";
 
-MarcoPolo::MarcoPolo(io_service& ioService, unsigned short poloPort)
-    : ioService(ioService), poloPort(poloPort)
+MarcoPolo::MarcoPolo(io_service& ioService, string poloName, unsigned short poloPort)
+    : ioService(ioService), poloName(poloName), poloPort(poloPort)
 {
     //ctor
 }
@@ -20,6 +27,23 @@ MarcoPolo::~MarcoPolo()
 {
     //dtor
 }
+
+string MarcoPolo::marcoMsg()
+{
+    stringstream msg;
+    msg << "marco" << MSG_SEPAR << poloName;
+
+    return msg.str();
+}
+
+string MarcoPolo::poloMsg(unsigned short poloTcpPort)
+{
+    stringstream msg;
+    msg << "polo" << MSG_SEPAR << poloName << MSG_SEPAR << poloTcpPort;
+
+    return msg.str();
+}
+
 
 bool MarcoPolo::marco()
 {
@@ -30,55 +54,71 @@ bool MarcoPolo::marco()
 
     udp::endpoint remoteEndpt(ip::address_v4::broadcast(), poloPort);
 
-    //##debug
-    std::cout << "Sending marco on " << sock.local_endpoint() << "\n";
+    string marcoMsg = this->marcoMsg();
 
-    std::string msg = "marco";
-    sock.send_to(boost::asio::buffer(msg), remoteEndpt);
+    //##debug
+    cout << "Broadcasting " << marcoMsg << " on " << sock.local_endpoint() << " to port " << poloPort << "\n";
+
+    sock.send_to(boost::asio::buffer(marcoMsg), remoteEndpt);
 
     //-- recv --
-    std::string reply = recv(sock);
+    string reply = recv(sock);
 
     //##debug
-    std::cout << "Reply is: " << reply << "\n";
-    std::cout << "from " << response_endpoint << std::endl;
+    cout << "Reply is: " << reply << "\n";
+    cout << "from " << response_endpoint << endl;
 
-    return reply == "polo";
+    // decode reply !
+    // split by separator MSG_SEPAR
+    bool ret = false;
+    vector<string> responseParts;
+    split(responseParts, reply, is_any_of(MSG_SEPAR), token_compress_on);
+    if (responseParts.size() == 3)
+    {
+        if (responseParts[0] == "polo" && responseParts[1] == poloName)
+        {
+            poloResponsePort_ = responseParts[2];
+            ret = true;
+        }
+    }
+
+    return ret;
 }
 
 
-bool MarcoPolo::polo()
+bool MarcoPolo::polo(unsigned short poloListenTcpPort)
 {
     // -- recv --
     udp::socket sock(ioService, udp::endpoint(udp::v4(), poloPort));
 
-    std::string reply = recv(sock);
+    string msg = recv(sock);
 
     //## debug
-    std::cout << "received  : " << reply << "\n";
-    std::cout << "from " << response_endpoint << std::endl;
+    cout << "received  : " << msg << "\n";
+    cout << "from " << response_endpoint << endl;
 
-    bool ok = (reply == "marco");
+    //## PQ TODO parse !
+    bool ok = (msg == marcoMsg());
     if (ok) {
         // -- send --
-        std::string polo = "polo";
-        sock.send_to(boost::asio::buffer(polo), response_endpoint);
+        string poloMsg = this->poloMsg(poloListenTcpPort);
+        sock.send_to(boost::asio::buffer(poloMsg), response_endpoint);
     }
     else {
-        std::cout << "NOT a MARCO request" << std::endl;
+        cout << "NOT a MARCO request" << endl;
     }
 
     return ok;
 }
 
-std::string MarcoPolo::recv(udp::socket& sock)
+string MarcoPolo::recv(udp::socket& sock)
 {
     char data[max_length+1];
     size_t length = sock.receive_from(
         boost::asio::buffer(data, max_length), response_endpoint);
 
     data[length] = 0;
-    std::string reply(data);
+    string reply(data);
 
     return reply;
 }

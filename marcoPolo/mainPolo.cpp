@@ -2,7 +2,7 @@
 // Copyright 2012 Philippe Quesnel
 // Licensed under the Academic Free License version 3.0
 // -- mainPolo.cpp --
-#include <boost/asio.hpp>
+#include "stdafx.h"
 #include "marcoPolo.h"
 
 using namespace boost::asio;
@@ -23,9 +23,10 @@ int main(int argc, char* argv[])
 
     io_service io_service;
 
-    MarcoPolo marcoPolo(io_service);
+    MarcoPolo marcoPolo(io_service, "testMarcoPolo");
 
-    std::cout << marcoPolo.polo() << std::endl;
+    unsigned short poloListenTcpPort = 0;
+    std::cout << marcoPolo.polo(poloListenTcpPort) << std::endl;
   }
   catch (std::exception& e)
   {

@@ -11,19 +11,27 @@
 class MarcoPolo
 {
     public:
-        MarcoPolo(boost::asio::io_service& ioService, unsigned short poloPort=4444);
+        MarcoPolo(boost::asio::io_service& ioService, std::string poloName, unsigned short poloPort=4444);
         virtual ~MarcoPolo();
 
         bool marco();
-        bool polo();
+        bool polo(unsigned short poloListenTcpPort);
+
+        std::string poloResponsePort() { return poloResponsePort_; }
+        boost::asio::ip::udp::endpoint poloEndpoint() { return response_endpoint; }
 
     private:
         std::string recv(boost::asio::ip::udp::socket& sock);
+        std::string marcoMsg();
+        std::string poloMsg(unsigned short poloListenTcpPort);
 
     private:
         boost::asio::io_service& ioService;
-        boost::asio::ip::udp::endpoint response_endpoint;
+        std::string poloName;
         unsigned short poloPort;
+
+        boost::asio::ip::udp::endpoint response_endpoint;
+        std::string poloResponsePort_;
 };
 
 

@@ -1,10 +1,16 @@
 *.[oa]
+*.obj
+*.ncb
+*.suo
+*.user
 *.layout
 *.depend
 *.class
 *~
 obj/
 bin/
+Debug/
+Release/
 .metadata/
 android-support-v4.jar
 fileServer/data/
