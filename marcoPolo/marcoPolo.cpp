@@ -4,6 +4,7 @@
 //--marcoPolo.cpp --
 #include "stdafx.h"
 #include <boost/algorithm/string/classification.hpp>
+#include <boost/thread.hpp>
 #include <boost/bind.hpp>
 #include <boost/lexical_cast.hpp>
 #include "marcoPolo.h"
@@ -55,19 +56,16 @@ bool MarcoPolo::marco()
 
         while (!foundPolo)
         {
+            // send a(nother) 'marco'
             sendMarco(sock);
 
-            // we received something, break here
-            // we will re-send 'marco' if we did not get a proper answer (!foundPolo)
-            if (ioService.poll_one() >= 1)
-                break;
-
-            // no answer, wait before sending 'marco' again
-            sleep(1); // 1sec
-
-            // check again for processed recv before re-sending, might have come in while sleeping
-            if (ioService.poll_one() >= 1)
-                break;
+            // wait up to 1sec, checking if we recvd data
+            for (int i = 0; i < 10; i++) {
+                // check for recvd data after waiting a bit
+                boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+                if (ioService.poll_one() >= 1)
+                    break;
+            }
         }
     }
 

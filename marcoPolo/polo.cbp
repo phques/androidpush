@@ -35,6 +35,7 @@
 		</Compiler>
 		<Linker>
 			<Add library="boost_system" />
+			<Add library="boost_thread" />
 			<Add library="pthread" />
 			<Add directory="$(#boost.lib)" />
 		</Linker>
