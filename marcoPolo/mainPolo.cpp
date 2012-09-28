@@ -6,6 +6,7 @@
 #include "marcoPolo.h"
 
 using namespace boost::asio;
+using namespace std;
 
 using boost::asio::ip::udp;
 
@@ -13,30 +14,27 @@ using boost::asio::ip::udp;
 
 int main(int argc, char* argv[])
 {
-  try
-  {
+    try
+    {
 //    if (argc != 3)
 //    {
 //      std::cerr << "Usage: blocking_udp_echo_client <host> <port>\n";
 //      return 1;
 //    }
 
-    io_service io_service;
+        io_service io_service;
 
-    MarcoPolo marcoPolo(io_service, "testMarcoPolo");
+        MarcoPolo marcoPolo(io_service, "testMarcoPolo");
 
-    unsigned short poloListenTcpPort = 1234; // would be the port of the socket we do listen() with
-    bool ok = false;
-    while (!ok)
-    {
-        ok = marcoPolo.polo(poloListenTcpPort);
-        std::cout << ok << std::endl;
+        unsigned short poloListenTcpPort = 1234; // would be the port of the socket we do listen() with
+        bool ok = false;
+        while (true) {
+            ok = marcoPolo.polo(poloListenTcpPort);
+            cout << ok << endl;
+        }
+    } catch (exception& e) {
+        cerr << "Exception: " << e.what() << "\n";
     }
-  }
-  catch (std::exception& e)
-  {
-    std::cerr << "Exception: " << e.what() << "\n";
-  }
 
   return 0;
 }

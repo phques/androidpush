@@ -10,6 +10,8 @@
 
 class MarcoPolo
 {
+    enum { max_length = 1024 };
+
     public:
         MarcoPolo(boost::asio::io_service& ioService, std::string poloName, unsigned short poloPort=4444);
         virtual ~MarcoPolo();
@@ -17,11 +19,14 @@ class MarcoPolo
         bool marco();
         bool polo(unsigned short poloListenTcpPort);
 
-        std::string poloResponsePort() { return poloResponsePort_; }
-        boost::asio::ip::udp::endpoint poloEndpoint() { return response_endpoint; }
+        unsigned short poloResponsePort() { return poloResponsePort_; }
+        boost::asio::ip::udp::endpoint poloEndpoint() { return responseEndpoint; }
 
     private:
-        std::string recv(boost::asio::ip::udp::socket& sock, boost::asio::ip::udp::endpoint& response_endpoint);
+        std::string recv(boost::asio::ip::udp::socket& sock, boost::asio::ip::udp::endpoint& responseEndpoint);
+        void handleReceiveFromPolo(const boost::system::error_code& error, size_t bytes_recvd);
+        void sendMarco(boost::asio::ip::udp::socket& sock);
+
         std::string marcoMsg();
         std::string poloMsg(unsigned short poloListenTcpPort);
 
@@ -29,9 +34,11 @@ class MarcoPolo
         boost::asio::io_service& ioService;
         std::string poloName;
         unsigned short poloPort;
+        bool foundPolo;
 
-        boost::asio::ip::udp::endpoint response_endpoint;
-        std::string poloResponsePort_;
+        boost::asio::ip::udp::endpoint responseEndpoint;
+        unsigned short poloResponsePort_;
+        char data[max_length+1];
 };
 
 
