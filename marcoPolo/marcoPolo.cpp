@@ -54,17 +54,19 @@ bool MarcoPolo::marco()
                    boost::asio::placeholders::error,
                    boost::asio::placeholders::bytes_transferred));
 
-        while (!foundPolo)
+        bool gotData = false;
+        while (!foundPolo && !gotData)
         {
             // send a(nother) 'marco'
             sendMarco(sock);
 
             // wait up to 1sec, checking if we recvd data
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 10 && !gotData; i++) {
                 // check for recvd data after waiting a bit
                 boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+
                 if (ioService.poll_one() >= 1)
-                    break;
+                    gotData = true;
             }
         }
     }
