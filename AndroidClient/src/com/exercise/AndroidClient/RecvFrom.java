@@ -199,8 +199,9 @@ public 	class RecvFrom {
 	}
 
 	/** extract data from the json object string */
-	private void parseJson(String json) throws JSONException {			
-		JSONObject object = (JSONObject) new JSONTokener(json).nextValue();
+	private void parseJson(String json) throws JSONException {
+		JSONTokener tokener = new JSONTokener(json);
+		JSONObject object = (JSONObject) tokener.nextValue();
 		remotePort = object.getInt("recvFromPort");
 		filename = object.getString("file");  
 		subDir = object.getString("subDir");  
