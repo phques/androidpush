@@ -1,5 +1,13 @@
 android file pusher
 
+gen (2013-07)
+------------
++ rename old androidPushHttp project it conflicts in eclipse with current AndroidPushClient
++ merge marcoPolo branch into main
+  + change androidPush server/client to use marcoPolo
++ reminder: see about using android sdk tools to connect through usb (ie as debugger, port 'bridge' (?))  
+
+
 AndroidClient
 -------------
 + preferences for udpPort !?
