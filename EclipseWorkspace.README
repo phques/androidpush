@@ -1,0 +1,20 @@
+
+Note: it is not recommended to put the GIT repository / working folders 
+under the Eclipse workspace.
+
+So to work with the Eclipse Android projects,
+create a new folder somewhere *outside* of the structure of these folders,
+(for example, I use : ~/workspaces/AndroidPush)
+and import the projects into your workspace.
+
+After doing a checkout, I used (from my workspace): 
+File | Import Project
+  Git | Projects from Git
+    local
+    Add, browse to your git directory
+    Import existing projects
+    select the projects you want
+    finish
+
+this way, the eclipse egit plugin can also be used !
+
