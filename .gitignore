@@ -14,5 +14,6 @@ Release/
 .metadata/
 android-support-v4.jar
 fileServer/data/
+gen/
 /gitgui
 /gitk
