@@ -7,6 +7,9 @@ create a new folder somewhere *outside* of the structure of these folders,
 (for example, I use : ~/workspaces/AndroidPush)
 and import the projects into your workspace.
 
+Update: if doing first checkout, use Eclipse Import from Git *and import from the remote ULR* !!
+
+-------
 After doing a checkout, I used (from my workspace): 
 File | Import Project
   Git | Projects from Git
