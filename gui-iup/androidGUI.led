@@ -11,7 +11,7 @@ mainDialog = DIALOG[TITLE="Android Push", MINSIZE=240x340]
       vbox[NMARGIN=5x5, EXPAND=YES](
         vbox(
           label("Root"),
-          destinationRoots = list[DROPDOWN="YES", EXPAND=HORIZONTAL](rootCB)
+          destRootsList = list[DROPDOWN="YES", EXPAND=HORIZONTAL](rootCB)
         ),
         #fill[SIZE=4](),
         vbox(
@@ -25,12 +25,12 @@ mainDialog = DIALOG[TITLE="Android Push", MINSIZE=240x340]
       vbox[NMARGIN=5x5, EXPAND=YES](
         vbox(
           label("Root"),
-          localRoot = text[EXPAND=HORIZONTAL, MARGIN=5](do_nothing)
+          localRootEdit = text[EXPAND=HORIZONTAL, MARGIN=5](do_nothing)
         ),
         fill[SIZE=4](),
         vbox[EXPAND=YES](
           label("Files"),
-          files = list[EXPAND=YES](do_nothing)
+          filesList = list[EXPAND=YES](do_nothing)
         )
       )
     ),

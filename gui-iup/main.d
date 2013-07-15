@@ -20,13 +20,21 @@ import kwezd.jsonutil;
 import config;
 
 
- version = led;
+version = led;
 
-class MainWindow : IupWidget {
 
+// class that will hold all the controls we work with
+// autopopulate with FetchWidgets()
+protected class Widgets {
     IupWidget destRootsList;
     IupWidget localRootEdit;
     IupWidget filesList;
+};
+
+
+class MainWindow : IupWidget {
+
+    Widgets w;
 
     Config config;
     JsonWrap jsonCfg;
@@ -37,55 +45,22 @@ class MainWindow : IupWidget {
 
 
     this() {
-        /* loads LED 'resource' file */
-        version(led) {
-            char* error = IupLoad("androidGUI.led");
-            enforce(!error, to!string(error));
-        }
-        else {
-            led_load();
-        }
-
         super("mainDialog");
+        w = new Widgets();
         loadConfig();
-        getWidgets();
+        FetchWidgets(w);
         setupWidgets();
     }
 
-    void getWidgets() {
-        // get 'handle' on widgets by name
-        destRootsList = new IupWidget("destinationRoots");
-        localRootEdit = new IupWidget("localRoot");
-        filesList = new IupWidget("files");
-    }
 
+    version(none)
     static extern(C) int testcb(Ihandle *self, const char* filename, int num, int x, int y) {
         writefln("testcb %s, %s, %s, %s", to!string(filename), num,x,y);
         return IUP_DEFAULT;
     }
 
-    void setupWidgets(){
-        setupDestRoots();
-
-//        filesList["DROPTARGET"] = "yes";
-        filesList.setDelegate(&this.fileDndCB, "DROPFILES_CB");
-//        IupSetCallback(*filesList, "DROPFILES_CB", cast(Icallback)&testcb);
-    }
-
-    void setupDestRoots() {
-        // fill dest roots list
-        foreach (idx, val; rootsType)
-            if (idx > 0)
-                destRootsList[to!string(idx)] = val;
-
-        // select 1st entry
-        destRootsList["VALUE"] = "1";
-        setLocalRootFromDestRoot(rootsType[1]);
-
-        destRootsList.setDelegate(&this.rootsCB);
-    }
-
     void loadConfig() {
+        // create/fill Config config from JSON settings file
         string jsonCfgText = readText("config.json");
         jsonCfg = new JsonWrap(jsonCfgText, "config");
 
@@ -93,16 +68,40 @@ class MainWindow : IupWidget {
         jsonCfg.Populate(config);
     }
 
+    void setupWidgets(){
+        setupDestRoots();
+
+//        w.filesList["DROPTARGET"] = "yes";
+        w.filesList.setDelegate(&this.fileDndCB, "DROPFILES_CB");
+//        IupSetCallback(*w.filesList, "DROPFILES_CB", cast(Icallback)&testcb);
+    }
+
+    void setupDestRoots() {
+        // fill the destination roots list
+        foreach (idx; 1 .. rootsType.length)
+            w.destRootsList[to!string(idx)] = rootsType[idx];
+
+        // select 1st entry (need to manually call setLocalRootFromDestRoot)
+        w.destRootsList["VALUE"] = "1";
+        setLocalRootFromDestRoot(rootsType[1]);
+
+        w.destRootsList.setDelegate(&this.rootsCB);
+    }
 
 
-    // set value of localRoot edit from selected destRoots list item
+
+
+    // set value of localRootEdit from selected destRoots list item
     // ie: = config[selected='music']
     void setLocalRootFromDestRoot(string itemText) {
+        // get the localRoot value for this destinatino root from the config
         auto newVal = jsonCfg.localRoots[itemText].str;
-        localRootEdit["VALUE"] = newVal;
+        // set the localRootEdit widget
+        w.localRootEdit["VALUE"] = newVal;
     }
 
     // destRoots list callback
+    // calls setLocalRootFromDestRoot when an item is selected
     int rootsCB(Ihandle *ih, char *text, int item, int state) {
         debug writefln("rootscb %s %s %s", to!string(text), item, state);
 
@@ -127,11 +126,11 @@ class MainWindow : IupWidget {
     }
 
     void processDroppedFilenames() {
-        filesList["1"] = NULL; // remove all
+        w.filesList["1"] = NULL; // remove all
 
         foreach (i, filename; droppedFiles) {
             writeln("file: ", filename);
-            filesList[to!string(i+1)] = filename;
+            w.filesList[to!string(i+1)] = filename;
         }
 
         // clear droppedFiles
@@ -141,6 +140,19 @@ class MainWindow : IupWidget {
 
 //---------------------
 
+void loadLed()
+{
+    /* loads LED 'resource' file */
+    version(led) {
+        char* error = IupLoad("androidGUI.led");
+        enforce(!error, to!string(error));
+    }
+    else {
+        led_load();
+    }
+}
+
+
 int main(string[] args)
 {
 
@@ -148,6 +160,7 @@ int main(string[] args)
         /* IUP initialization */
         IupOpenD(args);
         IupControlsOpen() ;
+        loadLed();
 
         scope auto window = new MainWindow;
 
