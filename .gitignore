@@ -6,6 +6,7 @@
 *.layout
 *.depend
 *.class
+*.userprefs
 *~
 obj/
 bin/
