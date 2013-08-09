@@ -55,15 +55,9 @@
     <DebugLevel>0</DebugLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="config.d">
-      <LastGenOutput>obj/Debug/config.o</LastGenOutput>
-    </Compile>
-    <Compile Include="loadledc.d">
-      <LastGenOutput>obj/Debug/loadledc.o</LastGenOutput>
-    </Compile>
-    <Compile Include="main.d">
-      <LastGenOutput>obj/Debug/main.o</LastGenOutput>
-    </Compile>
+    <Compile Include="config.d" />
+    <Compile Include="loadledc.d" />
+    <Compile Include="main.d" />
   </ItemGroup>
   <ItemGroup>
     <None Include="config.json" />

@@ -13,12 +13,12 @@
 				<Option compiler="gdc" />
 				<Compiler>
 					<Add option="-funittest" />
-					<Add option="-g" />
 					<Add option="-fdebug" />
+					<Add option="-g" />
 				</Compiler>
 				<Linker>
-					<Add directory="$(#iupd.lib)/bin/Debug" />
-					<Add directory="$(#kwezd.lib)/bin/Debug" />
+					<Add directory="../submodules/iupd/iup/bin/Debug" />
+					<Add directory="../submodules/kwezd/kwezd/bin/Debug" />
 				</Linker>
 			</Target>
 			<Target title="Release">
@@ -31,15 +31,15 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
-					<Add directory="$(#iupd.lib)/bin/Release" />
-					<Add directory="$(#kwezd.lib)/bin/Release" />
+					<Add directory="../submodules/iupd/iup/bin/Release" />
+					<Add directory="../submodules/kwezd/kwezd/bin/Release" />
 				</Linker>
 			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
-			<Add directory="$(#iupd.include)" />
-			<Add directory="$(#kwezd.include)" />
+			<Add directory="../submodules/iupd" />
+			<Add directory="../submodules/kwezd" />
 		</Compiler>
 		<Linker>
 			<Add library="iup" />

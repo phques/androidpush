@@ -1,0 +1,6 @@
+[submodule "submodules/kwezd"]
+	path = submodules/kwezd
+	url = https://code.google.com/p/kwezd/
+[submodule "submodules/iupd"]
+	path = submodules/iupd
+	url = https://code.google.com/p/iupd/

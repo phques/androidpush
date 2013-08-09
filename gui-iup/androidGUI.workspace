@@ -2,10 +2,10 @@
 <CodeBlocks_workspace_file>
 	<Workspace title="androidGUI">
 		<Project filename="androidGUI.cbp">
-			<Depends filename="../../IupD.git/iup/iupdlib.cbp" />
-			<Depends filename="../../kwezd.git/kwezd/kwezd.cbp" />
+			<Depends filename="../submodules/iupd/iup/iupdlib.cbp" />
+			<Depends filename="../submodules/kwezd/kwezd/kwezd.cbp" />
 		</Project>
-		<Project filename="../../IupD.git/iup/iupdlib.cbp" />
-		<Project filename="../../kwezd.git/kwezd/kwezd.cbp" />
+		<Project filename="../submodules/iupd/iup/iupdlib.cbp" />
+		<Project filename="../submodules/kwezd/kwezd/kwezd.cbp" />
 	</Workspace>
 </CodeBlocks_workspace_file>
