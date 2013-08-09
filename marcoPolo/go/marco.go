@@ -45,6 +45,7 @@ func main() {
 		//fmt.Printf("wrote %d bytes\n", nbBytes)
 
 		// read back answer, try 10x 100ms (total 1s)
+		fmt.Println("get polo answer")
 
 		answer := make([]byte, 1024)
 
