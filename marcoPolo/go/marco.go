@@ -4,8 +4,7 @@ package main
 import (
 	"fmt"
 	"net"
-
-//	"time"
+	"time"
 )
 
 func isTimeout(err error) bool {
@@ -15,55 +14,49 @@ func isTimeout(err error) bool {
 
 func main() {
 
-	// open broadcast UDP port
+	// open local UDP port
 	fmt.Println("net.DialUDP")
-	BROADCAST_IPv4 := net.IPv4(255, 255, 255, 255)
-    
-	udpConn, err := net.DialUDP("udp4", nil, &net.UDPAddr{
-		IP:   BROADCAST_IPv4,
-		Port: 4444,
-	})
+
+	localUdpAddr := net.UDPAddr{ IP: net.IPv4(0, 0, 0, 0), Port: 0 }
+	
+	udpConn, err := net.ListenUDP("udp4", &localUdpAddr)
 	if err != nil {
 		fmt.Println("error open udp socket: ", err)
 		return
 	}
 
-//~ 	fmt.Println("udpConn.LocalAddr()", udpConn.LocalAddr())
-//~ 	udpConn.Close()
-//~ 	fmt.Println("udpConn.LocalAddr()", udpConn.LocalAddr())
-	
-	var connected bool = false
 
-	for !connected {
+	// destination 'marco' broadcast UDP address
+    remoteBroadcastUdpAddr := net.UDPAddr{ IP: net.IPv4(255, 255, 255, 255), Port: 4444 }
+
+	var success bool = false
+
+	for !success {
 		// send 'marco'
+		fmt.Println("sending marco")
+		
 		marcoMsg := "marco|testMarcoPolo"
-		nbBytes, err := udpConn.Write([]byte(marcoMsg))
+		nbBytes, err := udpConn.WriteToUDP([]byte(marcoMsg), &remoteBroadcastUdpAddr)
 		if err != nil {
 			fmt.Println("error sending marco ", err)
 			return
 		}
-		fmt.Printf("wrote %d bytes\n", nbBytes)
-		udpConn.Close()
+		_ = nbBytes
+		//fmt.Printf("wrote %d bytes\n", nbBytes)
 
 		// read back answer, try 10x 100ms (total 1s)
 
-		// need to open new udp conn on auto-allocated port to read back answer
-		udpConnRead, err := net.ListenUDP("udp4", udpConn.LocalAddr().(*net.UDPAddr))
-		if err != nil {
-			fmt.Println("error open udp read: ", err)
-			return
-		}
+		answer := make([]byte, 1024)
 
-		data := make([]byte, 1024)
+		for i := 0; !success && i < 10; i++ {
+			// set read timeout on connection to 100ms
+			deadline := time.Now().Add(time.Millisecond * 100)
+			udpConn.SetReadDeadline(deadline)
 
-		for i := 0; !connected && i < 10; i++ {
-			//deadline := time.Now()
-			//deadline = deadline.Add(time.Millisecond * 100)
-			//udpConnRead.SetReadDeadline(deadline)
-
-			//nbBytes, udpAddr, err := udpConnRead.ReadFromUDP(data)
-			//nbBytes, _, err := udpConnRead.ReadFrom(data)
-			nbBytes, err := udpConnRead.Read(data)
+			// Try to read answer
+			//nbBytes, udpAddr, err := udpConnRead.ReadFromUDP(answer)
+			//nbBytes, addr, err := udpConnRead.ReadFrom(answer)
+			nbBytes, err := udpConn.Read(answer)
 
 			if err != nil {
 				if !isTimeout(err) {
@@ -72,9 +65,9 @@ func main() {
 				}
 				//fmt.Println("timeout reading back answer")
 			} else {
-				//fmt.Printf("read %d bytes '%s' from %s\n", nbBytes, data[:nbBytes], udpAddr.String())
-				fmt.Printf("read %d bytes '%s'\n", nbBytes, data[:nbBytes])
-				connected = true
+				//fmt.Printf("read %d bytes: '%s', from %s\n", nbBytes, answer[:nbBytes], udpAddr.String())
+				fmt.Printf("read %d bytes: '%s'\n", nbBytes, answer[:nbBytes])
+				success = true
 			}
 		}
 	}
