@@ -16,22 +16,16 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(roots)
+	fmt.Println("roots : ", roots, "\n------")
 
-	// test Lookup a local dir
-	//var foundRoot dirroot.MediaRoot
-	//var found bool
-	//foundRoot, found = roots.LookupLocal("/home/kwez/Pictures/07Aug/12Aout/pic1.jpg")
-	//if found {
-	//	fmt.Printf("Found: '%s' => %s @ %d\n",
-	//		foundRoot.Name, foundRoot, foundRoot.LocalIdx)
-	//}
-	var foundRoot dirroot.FoundLocalRoot
-	var found bool
-	foundRoot, found = roots.LookupLocal("/home/kwez/Pictures/07Aug/12Aout/pic1.jpg")
+	localPath := "/home/kwez/Pictures/07Aug/12Aout/pic1.jpg"
+
+	foundRoot, found := roots.LookupLocal(localPath)
 	if found {
+		fmt.Println(localPath)
 		fmt.Printf("Found: '%s' =>\n%s\n   %s\n",
 			foundRoot.MediaRoot.Name, foundRoot.Base, foundRoot.Tail)
+		fmt.Printf(" => %s/%s\n", foundRoot.MediaRoot.RemoteDirs[0], foundRoot.Tail)
 	}
 
 }

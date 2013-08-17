@@ -12,56 +12,36 @@ import (
 
 //---------
 
-// Root directories for a media type, ie "music",
+// Root local & remote directories for a media type, ie "music",
 type MediaRoot struct {
 	LocalDirs  []string // local root directories
 	RemoteDirs []string // remote root directories
 	Name       string   // media name ("music", "pictures"..)
-	LocalIdx   int
 }
 
-// index=name, ie roots["Music"] = MediaRoot{Name="Music"...}
+// Map of MediaRoot indexed by media name
+//  ie roots["Music"] = MediaRoot{Name="Music"...}
 type Roots map[string]MediaRoot
 
-// Result of a local root lookup
+// FoundLocalRoot is the result of a local root lookup
 type FoundLocalRoot struct {
-	FullPath  string
 	MediaRoot MediaRoot
-	Idx       int // index of found local root
+	Idx       int // index of found local root MediaRoot.LocalDirs[Idx]
+	FullPath  string
 	Base      string
 	Tail      string
 }
 
 //-----------
 
-// 'toString' for a MediaRoot
+// String formats a MediaRoot for output
 func (roots MediaRoot) String() string {
 	return fmt.Sprintf("LocalDirs: %s, RemoteDirs: %s", roots.LocalDirs, roots.RemoteDirs)
 }
 
 //-----------
 
-// Find a local root for 'dir' in root *MediaRoot
-func (root *MediaRoot) _LookupLocal(localPath string) (foundLocalIdx int, found bool) {
-	// compare all lowercase (ie- Windows FS not case sensitive)
-	lowerDir := strings.ToLower(localPath)
-	var foundLen = 0 // use the longest root found
-
-	for idx, localRoot := range root.LocalDirs {
-		// if localRoot is a prefix of localPath then we found a root dir
-		if strings.HasPrefix(lowerDir, strings.ToLower(localRoot)) {
-			// only use this one if it is a longer prefix than prev found
-			if len(localRoot) > foundLen {
-				foundLocalIdx = idx
-				found = true
-				foundLen = len(localRoot)
-			}
-		}
-	}
-	return
-}
-
-// Find a local root for 'dir' in root *MediaRoot
+// LookupLocal finds a local root for 'dir' in root *MediaRoot
 func (root *MediaRoot) LookupLocal(localPath string) (foundRoot FoundLocalRoot, found bool) {
 	// compare all lowercase (ie- Windows FS not case sensitive)
 	lowerDir := strings.ToLower(localPath)
@@ -92,21 +72,7 @@ func (root *MediaRoot) LookupLocal(localPath string) (foundRoot FoundLocalRoot, 
 
 //-----------
 
-// Find a local root for 'dir' in Roots
-func (roots Roots) _LookupLocal(dir string) (foundRoot MediaRoot, found bool) {
-	for _, mediaRoot := range roots {
-		if localIdx, didFindLocal := mediaRoot._LookupLocal(dir); didFindLocal {
-			// found a root dir, copy & save
-			foundRoot = mediaRoot
-			foundRoot.LocalIdx = localIdx
-			found = true
-			break
-		}
-	}
-	return
-}
-
-// Find a local root for 'dir' in Roots
+// LookupLocal finds a local root for 'dir' in Roots
 func (roots Roots) LookupLocal(dir string) (foundRoot FoundLocalRoot, found bool) {
 	for _, mediaRoot := range roots {
 		// try to a root dir of 'dir' in one of mediaRoot.Locals
@@ -120,7 +86,7 @@ func (roots Roots) LookupLocal(dir string) (foundRoot FoundLocalRoot, found bool
 
 //-----------
 
-// Create a Roots map from a json text file config (list of MediaRoot)
+// ReadRootdirs creates a Roots map from a json text file config (list of MediaRoot)
 func ReadRootdirs(jsonCfgFile string) (roots Roots, err error) {
 	// read json config file as text
 	jsonCfg, err := ioutil.ReadFile(jsonCfgFile)
