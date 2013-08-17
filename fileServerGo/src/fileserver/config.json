@@ -1,0 +1,18 @@
+[
+    {   "Name" : "Music",
+        "LocalDirs"  : ["/home/kwez/Music"],
+        "RemoteDirs" : ["/storage/extSdCard/Music"]
+    },
+    {   "Name" : "Downloads",
+        "LocalDirs"  : ["/home/kwez/Downloads"],
+        "RemoteDirs" : ["/storage/extSdCard/Download"]
+    },
+    {   "Name" : "Pictures",
+        "LocalDirs"  : ["/home/kwez/Pictures"],
+        "RemoteDirs" : ["/storage/extSdCard/Pictures"]
+    },
+    {   "Name" : "Movies",
+        "LocalDirs"  : ["/home/kwez/Videos"],
+        "RemoteDirs" : ["/storage/extSdCard/Movies"]
+    }
+]
