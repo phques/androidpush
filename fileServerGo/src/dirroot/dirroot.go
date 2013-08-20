@@ -1,18 +1,21 @@
 // AndroidPush project
 // Copyright 2013 Philippe Quesnel
 // Licensed under the Academic Free License version 3.0
+
+// Package dirroot provides types & methods to identify 'root' directories for filepaths.
+// The roots (local & corresponding remote) are read from a JSON config file
 package dirroot
 
 import (
 	"encoding/json"
-	"fmt"
+	//	"fmt"
 	"io/ioutil"
 	"strings"
 )
 
 //---------
 
-// Root local & remote directories for a media type, ie "music",
+// Local (& remote) 'root' directories for a media type, ie "music",
 type MediaRoot struct {
 	LocalDirs  []string // local root directories
 	RemoteDirs []string // remote root directories
@@ -30,13 +33,6 @@ type FoundLocalRoot struct {
 	FullPath  string
 	Base      string
 	Tail      string
-}
-
-//-----------
-
-// String formats a MediaRoot for output
-func (roots MediaRoot) String() string {
-	return fmt.Sprintf("LocalDirs: %s, RemoteDirs: %s", roots.LocalDirs, roots.RemoteDirs)
 }
 
 //-----------

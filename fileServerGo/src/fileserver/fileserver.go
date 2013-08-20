@@ -1,6 +1,8 @@
 // AndroidPush project
 // Copyright 2013 Philippe Quesnel
 // Licensed under the Academic Free License version 3.0
+
+// this will be the androidPush fileServer .. when I actually get to the real pgrm ! ;-p
 package main
 
 import (
@@ -16,7 +18,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("roots : ", roots, "\n------")
+	fmt.Printf("roots : %+v\n------\n", roots)
+	fmt.Printf("roots : %#v\n------\n", roots)
 
 	localPath := "/home/kwez/Pictures/07Aug/12Aout/pic1.jpg"
 
@@ -27,5 +30,4 @@ func main() {
 			foundRoot.MediaRoot.Name, foundRoot.Base, foundRoot.Tail)
 		fmt.Printf(" => %s/%s\n", foundRoot.MediaRoot.RemoteDirs[0], foundRoot.Tail)
 	}
-
 }
