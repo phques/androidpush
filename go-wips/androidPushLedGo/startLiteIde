@@ -1,0 +1,8 @@
+#!/bin/sh
+
+#mypath=`realpath $0`
+#export GOPATH=`dirname $mypath`
+
+export GOPATH=`pwd`:/home/kwez/src/go-iup-grdpq
+
+liteide `pwd` &

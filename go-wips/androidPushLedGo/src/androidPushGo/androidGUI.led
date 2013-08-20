@@ -1,0 +1,34 @@
+# AndroidPush IUP GUI LED file
+
+#~ mainDialog = DIALOG[TITLE="Android Push", SIZE=150, MARGINS=5x5]
+mainDialog = DIALOG[TITLE="Android Push", MARGINS=5x5]
+(
+  vbox[NMARGIN=5x5, NGAP=5x5, EXPAND=YES](
+  
+    frame[TITLE="Local Root"](
+      vbox[NMARGIN=5x5, NGAP=5x5, EXPAND=YES](
+        localRoot = text[EXPAND=HORIZONTAL, MARGIN=5](NULL)
+      )
+    ),
+    
+    frame[TITLE="Destination"](
+      vbox[NMARGIN=5x5, NGAP=5x5, EXPAND=YES](
+        vbox(
+          label("Root"),
+          destinationRoot = list[1="aa",2="bb",3="cc", DROPDOWN="YES", EXPAND=HORIZONTAL](NULL)
+        ),
+        
+        vbox(
+          label("Files"),
+          Files = list[EXPAND=YES](null)
+        )
+      )
+    ),
+    
+    # by setting size=150 horizontal, we force the whole dialog to be large
+    hbox[EXPAND=HORIZONTAL, SIZE=150](
+      fill(),
+      pushButton = button("Push", onPushButton)
+    )
+  )
+)

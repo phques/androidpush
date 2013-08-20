@@ -1,0 +1,2 @@
+
+export GOPATH=`pwd`:/home/kwez/src/go-iup-grdpq
