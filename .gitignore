@@ -12,6 +12,7 @@ obj/
 bin/
 Debug/
 Release/
+pkg/
 .metadata/
 android-support-v4.jar
 fileServer/data/
