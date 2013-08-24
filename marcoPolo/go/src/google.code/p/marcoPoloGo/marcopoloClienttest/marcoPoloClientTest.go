@@ -1,3 +1,7 @@
+// AndroidPush project
+// Copyright 2013 Philippe Quesnel
+// Licensed under the Academic Free License version 3.0
+
 // marcoPoloClientTest
 package main
 
@@ -30,8 +34,14 @@ func main() {
 	// open local UDP port
 	fmt.Println("net.DialUDP")
 
-	localUdpAddr := net.UDPAddr{IP: net.IPv4(0, 0, 0, 0), Port: 0}
+	// local udp socket
+	localAnyAddr := net.IPv4(0, 0, 0, 0)
+	localUdpAddr := net.UDPAddr{IP: localAnyAddr, Port: 0}
+	// destination 'marcoPolo' broadcast UDP address on marcoPoloUdpPort
+	broadcastAddr := net.IPv4(255, 255, 255, 255)
+	remoteBroadcastUdpAddr := net.UDPAddr{IP: broadcastAddr, Port: marcoPoloUdpPort}
 
+	// open local udp connection
 	udpConn, err := net.ListenUDP("udp4", &localUdpAddr)
 	if err != nil {
 		fmt.Println("error open udp socket: ", err)
@@ -39,19 +49,17 @@ func main() {
 	}
 	defer udpConn.Close()
 
-	// destination 'marcoPolo' broadcast UDP address
-	remoteBroadcastUdpAddr := net.UDPAddr{IP: net.IPv4(255, 255, 255, 255),
-		Port: marcoPoloUdpPort}
 
-	// send 'marco'
+	// send marcoPolo
 	fmt.Println("sending marco")
 
 	// create marco.polo msg with empty MarcoPoloMsg json object
 	var marcoPoloMsg MarcoPoloMsg
-	jsonStr, err := json.MarshalIndent(&marcoPoloMsg, "", "  ")
+	jsonStr, _ := json.MarshalIndent(&marcoPoloMsg, "", "  ")
 	marcoMsg := marcoPoloMsgPrefix + string(jsonStr)
 
-	nbBytes, _ := udpConn.WriteToUDP([]byte(marcoMsg), &remoteBroadcastUdpAddr)
+	// send msg
+	nbBytes, err := udpConn.WriteToUDP([]byte(marcoMsg), &remoteBroadcastUdpAddr)
 	if err != nil {
 		fmt.Println("error sending marco ", err)
 		return
