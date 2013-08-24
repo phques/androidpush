@@ -1,3 +1,7 @@
+// AndroidPush project
+// Copyright 2013 Philippe Quesnel
+// Licensed under the Academic Free License version 3.0
+
 // main.go
 package main
 
@@ -30,14 +34,7 @@ func main() {
 
 	// --- send back polo ----
 
-	// connect to sender (marco))
-	udpConn, err = net.DialUDP("udp4", nil, remoteAddr)
-	if err != nil {
-		fmt.Println("error open udp socket ", err)
-		return
-	}
-	// and send back answer
 	fmt.Println("sending back polo..")
-	udpConn.Write([]byte("polo|testMarcoPolo|1234"))
-
+	nbBytes, err := udpConn.WriteToUDP([]byte("polo|testMarcoPolo|1234"), remoteAddr)
+	fmt.Println("nbbytes, err : ", nbBytes, err)
 }
