@@ -16,6 +16,12 @@
         <Path>/home/kwez/code/kwezd.git</Path>
       </Includes>
     </Includes>
+    <DependentProjectIds>
+      <DependentProjectIds>
+        <String>{83A99682-3A8A-4F53-BA5C-042976C38A2B}</String>
+        <String>{965724DD-4E9C-478F-AE46-F7689DD62101}</String>
+      </DependentProjectIds>
+    </DependentProjectIds>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
