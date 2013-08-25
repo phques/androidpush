@@ -1,0 +1,18 @@
+{
+    "Music" : {
+        "Local"  : ["/home/kwez/Music"],
+        "Remote" : ["/storage/extSdCard/Music"]
+    },
+    "Downloads" : {
+        "Local"  : ["/home/kwez/Downloads"],
+        "Remote" : ["/storage/extSdCard/Download"]
+    },
+    "Pictures" : {
+        "Local"  : ["/home/kwez/Pictures"],
+        "Remote" : ["/storage/extSdCard/Pictures"]
+    },
+    "Movies" : {
+        "Local"  : ["/home/kwez/Videos"],
+        "Remote" : ["/storage/extSdCard/Movies"]
+    }
+}
