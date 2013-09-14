@@ -6,7 +6,7 @@
 package dirroot
 
 import (
-	"fmt"
+	//"fmt"
 	"testing"
 )
 
@@ -23,6 +23,7 @@ func TestLookupLocal(t *testing.T) {
 
 	// call LookupLocal
 	foundRoot, found := roots.LookupLocal(localPath)
+	_ = foundRoot
 	if !found {
 		t.Errorf("failed to find local root dir '%s'", localPath)
 	}
