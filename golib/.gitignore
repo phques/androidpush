@@ -1,3 +1,5 @@
 golib
 files
-
+# add back golib/goInterface/gen subdir
+# (skipped because of top level .gitignore)
+!gen/
