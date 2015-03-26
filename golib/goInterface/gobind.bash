@@ -5,6 +5,6 @@ if [[ -z $1 ]]; then
     exit 1
 fi
 
-export GOPATH=/home/philippe/code/mppq:$GOPATH
+#export GOPATH=/home/philippe/code/mppq:$GOPATH
 gobind -lang=$1 -outdir=gen github.com/phques/androidpush/golib/goInterface
 
