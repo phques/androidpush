@@ -1,8 +1,12 @@
+// AndroidPush project
+// Copyright 2015 Philippe Quesnel
+// Licensed under the Academic Free License version 3.0
 package main
 
 import (
 	"flag"
 	"fmt"
+
 	"github.com/phques/androidpush/golib/goInterface"
 	_ "github.com/phques/androidpush/golib/goInterface/gen"
 	"golang.org/x/mobile/app"
@@ -30,4 +34,8 @@ func start() {
 
 func stop() {
 	fmt.Println("main.stop")
+	if *standalone {
+		//ps: not really required since the app is closing anyways ;-)
+		goInterface.Stop()
+	}
 }

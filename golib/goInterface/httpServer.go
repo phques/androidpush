@@ -1,3 +1,7 @@
+// AndroidPush project
+// Copyright 2015 Philippe Quesnel
+// Licensed under the Academic Free License version 3.0
+
 package goInterface
 
 import (
@@ -12,11 +16,13 @@ var (
 	httpListenPort int
 )
 
+// StartHTTP starts a http.Serve() go routine, listening on a sys allocated local port
+// The listener and it's port are saved in httpListener / httpListenPort
 func StartHTTP() error {
 	// listen, on system assigned port
 	ln, err := net.Listen("tcp", ":0")
 	if err != nil {
-		log.Printf("Failed to HTTP Server : %v\n", err)
+		log.Printf("Failed to start HTTP Server : %v\n", err)
 		return err
 	}
 
@@ -29,14 +35,14 @@ func StartHTTP() error {
 	if err != nil {
 		httpListener.Close()
 		httpListener = nil
-		log.Printf("Failed to HTTP Server, error getting listener port : %v\n", err)
+		log.Printf("Failed to start HTTP Server, error getting listener port : %v\n", err)
 		return err
 	}
 	httpListenPort, err = strconv.Atoi(port)
 	if err != nil {
 		httpListener.Close()
 		httpListener = nil
-		log.Printf("Failed to HTTP Server, error getting listener port : %v\n", err)
+		log.Printf("Failed to start HTTP Server, error getting listener port : %v\n", err)
 	}
 
 	// start serving

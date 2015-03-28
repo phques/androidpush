@@ -1,14 +1,20 @@
-// Package goInterface is the Go API for the Android Java
+// AndroidPush project
+// Copyright 2015 Philippe Quesnel
+// Licensed under the Academic Free License version 3.0
+
+// Package goInterface is the Go API for the Android Java app
 package goInterface
 
 import (
 	//	"fmt"
-	"github.com/phques/mppq"
-	"golang.org/x/mobile/app"
+	"errors"
 	"io"
 	"log"
 	"os"
 	"path/filepath"
+
+	"github.com/phques/mppq"
+	"golang.org/x/mobile/app"
 )
 
 const (
@@ -19,14 +25,14 @@ var (
 	initDone     bool = false
 	mppqProvider *mppq.Provider
 
-	appFilesDir    string
-	configFilepath string
+	appFilesDir    string // directory where our app's file are
+	configFilepath string // path of our config file (inside appFilesDir)
 )
 
 //------
 
-// Start http, mppq servers, registers androidPush with mppq
-// nb: InitAppFilesDir should be called 1st
+// Start() starts http & mppq servers, registers androidPush service with mppq.
+// NB: InitAppFilesDir should be called 1st
 func Start() error {
 
 	log.Println("provider.Start")
@@ -38,19 +44,27 @@ func Start() error {
 
 	// create/start mppq provider
 	mppqProvider = mppq.NewProvider()
-	err := mppqProvider.Start()
-	if err != nil {
+	if err := mppqProvider.Start(); err != nil {
 		return err
 	}
 
 	// register androidPush
-	registerMppqService("androidPush")
+	if err := registerMppqService("androidPush"); err != nil {
+		return err
+	}
 
 	return nil
 }
 
-// Initialize the app's files dir, copies config file there if 1st time
-// called from android app
+// Stop stops the mppq provider
+func Stop() error {
+	if mppqProvider == nil {
+		return errors.New("Stop, Provider is not running")
+	}
+	return mppqProvider.Stop()
+}
+
+// InitAppFilesDir initializes the app's files dir & copies config file there the 1st time
 func InitAppFilesDir(appFilesDir_ string) error {
 	// already done ?
 	if initDone {
@@ -109,17 +123,19 @@ func copyConfigFile() (err error) {
 }
 
 // register a service we provide with mppq
-func registerMppqService(serviceName string) {
+func registerMppqService(serviceName string) error {
 
 	log.Println("registerMppqService", serviceName)
 
 	// register a service (mppqProvider must be started)
-	//## PQ use 'deviceName' from config
-	providerName, _ := os.Hostname() // returns 'localhost' on my Nexus 7
-	mppqProvider.AddService(mppq.ServiceDef{
+	//## PQ TODO use 'deviceName' from config
+	providerName, _ := os.Hostname() // returns 'localhost' on my Nexus 5/7
+	err := mppqProvider.AddService(mppq.ServiceDef{
 		ServiceName:  serviceName,
 		ProviderName: providerName,
 		HostPort:     httpListenPort,
 		Protocol:     "jsonhttp",
 	})
+
+	return err
 }
