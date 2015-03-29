@@ -11,7 +11,6 @@ import (
 	_ "github.com/phques/androidpush/golib/goInterface/gen"
 	"golang.org/x/mobile/app"
 	"golang.org/x/mobile/bind/java"
-	//	"net/http"
 )
 
 var standalone = flag.Bool("standalone", false, "running as a stand alone pgm")

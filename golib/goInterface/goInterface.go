@@ -17,6 +17,19 @@ import (
 	"golang.org/x/mobile/app"
 )
 
+type InitParam struct {
+	Hostname    string // reported name to mppq service query responses
+	AppFilesDir string // app's files dir, we store config file there
+
+	// config file directories, used to populate config file 1st time
+	Music     string
+	Downloads string
+	Documents string
+	Pictures  string
+	Movies    string
+	Books     string
+}
+
 const (
 	configFilename string = "config.json"
 )
@@ -31,6 +44,10 @@ var (
 
 //------
 
+func Init(param *InitParam) {
+	log.Println(*param)
+}
+
 // Start() starts http & mppq servers, registers androidPush service with mppq.
 // NB: InitAppFilesDir should be called 1st
 func Start() error {
@@ -38,7 +55,7 @@ func Start() error {
 	log.Println("provider.Start")
 
 	// start http server
-	if err := StartHTTP(); err != nil {
+	if err := startHTTP(); err != nil {
 		return err
 	}
 

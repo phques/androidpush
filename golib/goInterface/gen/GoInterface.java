@@ -9,6 +9,13 @@ import go.Seq;
 public abstract class GoInterface {
     private GoInterface() {} // uninstantiable
     
+    public static void Init(InitParam param) {
+        go.Seq _in = new go.Seq();
+        go.Seq _out = new go.Seq();
+        _in.writeRef(param.ref());
+        Seq.send(DESCRIPTOR, CALL_Init, _in, _out);
+    }
+    
     public static void InitAppFilesDir(String appFilesDir_) throws Exception {
         go.Seq _in = new go.Seq();
         go.Seq _out = new go.Seq();
@@ -18,6 +25,256 @@ public abstract class GoInterface {
         if (_err != null) {
             throw new Exception(_err);
         }
+    }
+    
+    public static final class InitParam implements go.Seq.Object {
+        private static final String DESCRIPTOR = "go.goInterface.InitParam";
+        private static final int FIELD_Hostname_GET = 0x00f;
+        private static final int FIELD_Hostname_SET = 0x01f;
+        private static final int FIELD_AppFilesDir_GET = 0x10f;
+        private static final int FIELD_AppFilesDir_SET = 0x11f;
+        private static final int FIELD_Music_GET = 0x20f;
+        private static final int FIELD_Music_SET = 0x21f;
+        private static final int FIELD_Downloads_GET = 0x30f;
+        private static final int FIELD_Downloads_SET = 0x31f;
+        private static final int FIELD_Documents_GET = 0x40f;
+        private static final int FIELD_Documents_SET = 0x41f;
+        private static final int FIELD_Pictures_GET = 0x50f;
+        private static final int FIELD_Pictures_SET = 0x51f;
+        private static final int FIELD_Movies_GET = 0x60f;
+        private static final int FIELD_Movies_SET = 0x61f;
+        private static final int FIELD_Books_GET = 0x70f;
+        private static final int FIELD_Books_SET = 0x71f;
+        
+        private go.Seq.Ref ref;
+        
+        private InitParam(go.Seq.Ref ref) { this.ref = ref; }
+        
+        public go.Seq.Ref ref() { return ref; }
+        
+        public void call(int code, go.Seq in, go.Seq out) {
+            throw new RuntimeException("internal error: cycle: cannot call concrete proxy");
+        }
+        
+        public String getHostname() {
+            Seq in = new Seq();
+            Seq out = new Seq();
+            in.writeRef(ref);
+            Seq.send(DESCRIPTOR, FIELD_Hostname_GET, in, out);
+            return out.readUTF16();
+        }
+        
+        public void setHostname(String v) {
+            Seq in = new Seq();
+            Seq out = new Seq();
+            in.writeRef(ref);
+            in.writeUTF16(v);
+            Seq.send(DESCRIPTOR, FIELD_Hostname_SET, in, out);
+        }
+        public String getAppFilesDir() {
+            Seq in = new Seq();
+            Seq out = new Seq();
+            in.writeRef(ref);
+            Seq.send(DESCRIPTOR, FIELD_AppFilesDir_GET, in, out);
+            return out.readUTF16();
+        }
+        
+        public void setAppFilesDir(String v) {
+            Seq in = new Seq();
+            Seq out = new Seq();
+            in.writeRef(ref);
+            in.writeUTF16(v);
+            Seq.send(DESCRIPTOR, FIELD_AppFilesDir_SET, in, out);
+        }
+        public String getMusic() {
+            Seq in = new Seq();
+            Seq out = new Seq();
+            in.writeRef(ref);
+            Seq.send(DESCRIPTOR, FIELD_Music_GET, in, out);
+            return out.readUTF16();
+        }
+        
+        public void setMusic(String v) {
+            Seq in = new Seq();
+            Seq out = new Seq();
+            in.writeRef(ref);
+            in.writeUTF16(v);
+            Seq.send(DESCRIPTOR, FIELD_Music_SET, in, out);
+        }
+        public String getDownloads() {
+            Seq in = new Seq();
+            Seq out = new Seq();
+            in.writeRef(ref);
+            Seq.send(DESCRIPTOR, FIELD_Downloads_GET, in, out);
+            return out.readUTF16();
+        }
+        
+        public void setDownloads(String v) {
+            Seq in = new Seq();
+            Seq out = new Seq();
+            in.writeRef(ref);
+            in.writeUTF16(v);
+            Seq.send(DESCRIPTOR, FIELD_Downloads_SET, in, out);
+        }
+        public String getDocuments() {
+            Seq in = new Seq();
+            Seq out = new Seq();
+            in.writeRef(ref);
+            Seq.send(DESCRIPTOR, FIELD_Documents_GET, in, out);
+            return out.readUTF16();
+        }
+        
+        public void setDocuments(String v) {
+            Seq in = new Seq();
+            Seq out = new Seq();
+            in.writeRef(ref);
+            in.writeUTF16(v);
+            Seq.send(DESCRIPTOR, FIELD_Documents_SET, in, out);
+        }
+        public String getPictures() {
+            Seq in = new Seq();
+            Seq out = new Seq();
+            in.writeRef(ref);
+            Seq.send(DESCRIPTOR, FIELD_Pictures_GET, in, out);
+            return out.readUTF16();
+        }
+        
+        public void setPictures(String v) {
+            Seq in = new Seq();
+            Seq out = new Seq();
+            in.writeRef(ref);
+            in.writeUTF16(v);
+            Seq.send(DESCRIPTOR, FIELD_Pictures_SET, in, out);
+        }
+        public String getMovies() {
+            Seq in = new Seq();
+            Seq out = new Seq();
+            in.writeRef(ref);
+            Seq.send(DESCRIPTOR, FIELD_Movies_GET, in, out);
+            return out.readUTF16();
+        }
+        
+        public void setMovies(String v) {
+            Seq in = new Seq();
+            Seq out = new Seq();
+            in.writeRef(ref);
+            in.writeUTF16(v);
+            Seq.send(DESCRIPTOR, FIELD_Movies_SET, in, out);
+        }
+        public String getBooks() {
+            Seq in = new Seq();
+            Seq out = new Seq();
+            in.writeRef(ref);
+            Seq.send(DESCRIPTOR, FIELD_Books_GET, in, out);
+            return out.readUTF16();
+        }
+        
+        public void setBooks(String v) {
+            Seq in = new Seq();
+            Seq out = new Seq();
+            in.writeRef(ref);
+            in.writeUTF16(v);
+            Seq.send(DESCRIPTOR, FIELD_Books_SET, in, out);
+        }
+        
+        @Override public boolean equals(Object o) {
+            if (o == null || !(o instanceof InitParam)) {
+                return false;
+            }
+            InitParam that = (InitParam)o;
+            String thisHostname = getHostname();
+            String thatHostname = that.getHostname();
+            if (thisHostname == null) {
+                if (thatHostname != null) {
+                    return false;
+                }
+            } else if (!thisHostname.equals(thatHostname)) {
+                return false;
+            }
+            String thisAppFilesDir = getAppFilesDir();
+            String thatAppFilesDir = that.getAppFilesDir();
+            if (thisAppFilesDir == null) {
+                if (thatAppFilesDir != null) {
+                    return false;
+                }
+            } else if (!thisAppFilesDir.equals(thatAppFilesDir)) {
+                return false;
+            }
+            String thisMusic = getMusic();
+            String thatMusic = that.getMusic();
+            if (thisMusic == null) {
+                if (thatMusic != null) {
+                    return false;
+                }
+            } else if (!thisMusic.equals(thatMusic)) {
+                return false;
+            }
+            String thisDownloads = getDownloads();
+            String thatDownloads = that.getDownloads();
+            if (thisDownloads == null) {
+                if (thatDownloads != null) {
+                    return false;
+                }
+            } else if (!thisDownloads.equals(thatDownloads)) {
+                return false;
+            }
+            String thisDocuments = getDocuments();
+            String thatDocuments = that.getDocuments();
+            if (thisDocuments == null) {
+                if (thatDocuments != null) {
+                    return false;
+                }
+            } else if (!thisDocuments.equals(thatDocuments)) {
+                return false;
+            }
+            String thisPictures = getPictures();
+            String thatPictures = that.getPictures();
+            if (thisPictures == null) {
+                if (thatPictures != null) {
+                    return false;
+                }
+            } else if (!thisPictures.equals(thatPictures)) {
+                return false;
+            }
+            String thisMovies = getMovies();
+            String thatMovies = that.getMovies();
+            if (thisMovies == null) {
+                if (thatMovies != null) {
+                    return false;
+                }
+            } else if (!thisMovies.equals(thatMovies)) {
+                return false;
+            }
+            String thisBooks = getBooks();
+            String thatBooks = that.getBooks();
+            if (thisBooks == null) {
+                if (thatBooks != null) {
+                    return false;
+                }
+            } else if (!thisBooks.equals(thatBooks)) {
+                return false;
+            }
+            return true;
+        }
+        
+        @Override public int hashCode() {
+            return java.util.Arrays.hashCode(new Object[] {getHostname(), getAppFilesDir(), getMusic(), getDownloads(), getDocuments(), getPictures(), getMovies(), getBooks()});
+        }
+        
+        @Override public String toString() {
+            StringBuilder b = new StringBuilder();
+            b.append("InitParam").append("{");
+            b.append("Hostname:").append(getHostname()).append(",");
+            b.append("AppFilesDir:").append(getAppFilesDir()).append(",");
+            b.append("Music:").append(getMusic()).append(",");
+            b.append("Downloads:").append(getDownloads()).append(",");
+            b.append("Documents:").append(getDocuments()).append(",");
+            b.append("Pictures:").append(getPictures()).append(",");
+            b.append("Movies:").append(getMovies()).append(",");
+            b.append("Books:").append(getBooks()).append(",");
+            return b.append("}").toString();
+        }
+        
     }
     
     public static void Start() throws Exception {
@@ -30,18 +287,19 @@ public abstract class GoInterface {
         }
     }
     
-    public static void StartHTTP() throws Exception {
+    public static void Stop() throws Exception {
         go.Seq _in = new go.Seq();
         go.Seq _out = new go.Seq();
-        Seq.send(DESCRIPTOR, CALL_StartHTTP, _in, _out);
+        Seq.send(DESCRIPTOR, CALL_Stop, _in, _out);
         String _err = _out.readUTF16();
         if (_err != null) {
             throw new Exception(_err);
         }
     }
     
-    private static final int CALL_InitAppFilesDir = 1;
-    private static final int CALL_Start = 2;
-    private static final int CALL_StartHTTP = 3;
+    private static final int CALL_Init = 1;
+    private static final int CALL_InitAppFilesDir = 2;
+    private static final int CALL_Start = 3;
+    private static final int CALL_Stop = 4;
     private static final String DESCRIPTOR = "goInterface";
 }
