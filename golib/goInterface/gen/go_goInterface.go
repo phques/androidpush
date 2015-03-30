@@ -163,6 +163,11 @@ func init() {
 	seq.Register(proxyInitParamDescriptor, proxyInitParamBooksGetCode, proxyInitParamBooksGet)
 }
 
+func proxy_NewInitParam(out, in *seq.Buffer) {
+	res := goInterface.NewInitParam()
+	out.WriteGoRef(res)
+}
+
 func proxy_Start(out, in *seq.Buffer) {
 	err := goInterface.Start()
 	if err == nil {
@@ -184,6 +189,7 @@ func proxy_Stop(out, in *seq.Buffer) {
 func init() {
 	seq.Register("goInterface", 1, proxy_Init)
 	seq.Register("goInterface", 2, proxy_InitAppFilesDir)
-	seq.Register("goInterface", 3, proxy_Start)
-	seq.Register("goInterface", 4, proxy_Stop)
+	seq.Register("goInterface", 3, proxy_NewInitParam)
+	seq.Register("goInterface", 4, proxy_Start)
+	seq.Register("goInterface", 5, proxy_Stop)
 }

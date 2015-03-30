@@ -277,6 +277,15 @@ public abstract class GoInterface {
         
     }
     
+    public static InitParam NewInitParam() {
+        go.Seq _in = new go.Seq();
+        go.Seq _out = new go.Seq();
+        InitParam _result;
+        Seq.send(DESCRIPTOR, CALL_NewInitParam, _in, _out);
+        _result = new InitParam(_out.readRef());
+        return _result;
+    }
+    
     public static void Start() throws Exception {
         go.Seq _in = new go.Seq();
         go.Seq _out = new go.Seq();
@@ -299,7 +308,8 @@ public abstract class GoInterface {
     
     private static final int CALL_Init = 1;
     private static final int CALL_InitAppFilesDir = 2;
-    private static final int CALL_Start = 3;
-    private static final int CALL_Stop = 4;
+    private static final int CALL_NewInitParam = 3;
+    private static final int CALL_Start = 4;
+    private static final int CALL_Stop = 5;
     private static final String DESCRIPTOR = "goInterface";
 }

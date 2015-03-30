@@ -44,6 +44,10 @@ var (
 
 //------
 
+func NewInitParam() *InitParam {
+	return new(InitParam)
+}
+
 func Init(param *InitParam) {
 	log.Println(*param)
 }

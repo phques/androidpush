@@ -1,6 +1,7 @@
 package org.kwezco.androidpush;
 
 import android.content.Context;
+import android.os.Environment;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -11,6 +12,8 @@ import java.io.File;
 import go.Go;
 import go.goInterface.GoInterface;
 
+import static android.os.Environment.getExternalStoragePublicDirectory;
+
 
 public class MainActivity extends ActionBarActivity {
 
@@ -19,16 +22,14 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Context context = getApplicationContext();
-        Go.init(context);
-
-        // init app files dir in Go lib
-        try {
-            File filesDir = getFilesDir();
-            GoInterface.InitAppFilesDir(filesDir.getPath());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        // init Go & go lib
+        initGoLib();
+//        try {
+//            File filesDir = getFilesDir();
+//            GoInterface.InitAppFilesDir(filesDir.getPath());
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
         // start http & mppq server
         try {
             GoInterface.Start();
@@ -38,6 +39,38 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
+    protected String getDir(String dirName) {
+        File dir = getExternalStoragePublicDirectory(dirName);
+        return dir.getPath();
+    }
+
+    protected void initGoLib() {
+        // 1st, init the Go runtime
+        Context context = getApplicationContext();
+        Go.init(context);
+
+        // now init our go interface / lib
+        // create/populate an init param
+        GoInterface.InitParam initParam = GoInterface.NewInitParam();
+
+        File filesDir = getFilesDir();
+        initParam.setAppFilesDir(filesDir.getPath());
+        initParam.setDocuments(getDir(Environment.DIRECTORY_DOCUMENTS));
+        initParam.setDownloads(getDir(Environment.DIRECTORY_DOWNLOADS));
+        initParam.setMovies(getDir(Environment.DIRECTORY_MOVIES));
+        initParam.setMusic(getDir(Environment.DIRECTORY_MUSIC));
+        initParam.setPictures(getDir(Environment.DIRECTORY_PICTURES));
+        try {
+            // call Init
+            GoInterface.Init(initParam);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+//        initParam.setBooks(Environment.);
+//        initParam.setHostname();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
