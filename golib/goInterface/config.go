@@ -14,12 +14,15 @@ type Config struct {
 	AppFilesDir string // app's files dir, we store config file there
 
 	// config file directories, used to populate config file 1st time
-	Books     []string
-	Documents []string
-	Downloads []string
-	Movies    []string
-	Music     []string
-	Pictures  []string
+	// ie ["Books"]("~/Books", "~/Calibre/lib/books")
+	Dirs map[string][]string
+
+	//	Books     []string
+	//	Documents []string
+	//	Downloads []string
+	//	Movies    []string
+	//	Music     []string
+	//	Pictures  []string
 }
 
 func (cfg *Config) Save() error {
@@ -33,26 +36,40 @@ func (cfg *Config) Save() error {
 	return nil
 }
 
+// AddDir adds entry dir in cfg.Dirs[name]
+func (cfg *Config) AddDir(name string, dir string) {
+	// create Dirs if nil
+	if cfg.Dirs == nil {
+		cfg.Dirs = make(map[string][]string)
+	}
+	// Get current list of directories for [name] and add new dir
+	dirs := cfg.Dirs[name]
+	cfg.Dirs[name] = append(dirs, dir)
+
+}
+
+/*
 func (cfg *Config) AddBooks(dir string) {
-	cfg.Books = append(cfg.Books, dir)
+	cfg.addDir("Books", dir)
 }
 
 func (cfg *Config) AddDocuments(dir string) {
-	cfg.Documents = append(cfg.Documents, dir)
+	cfg.addDir("Documents", dir)
 }
 
 func (cfg *Config) AddDownloads(dir string) {
-	cfg.Downloads = append(cfg.Downloads, dir)
+	cfg.addDir("Downloads", dir)
 }
 
 func (cfg *Config) AddMovies(dir string) {
-	cfg.Movies = append(cfg.Movies, dir)
+	cfg.addDir("Movies", dir)
 }
 
 func (cfg *Config) AddMusic(dir string) {
-	cfg.Music = append(cfg.Music, dir)
+	cfg.addDir("Music", dir)
 }
 
 func (cfg *Config) AddPictures(dir string) {
-	cfg.Pictures = append(cfg.Pictures, dir)
+	cfg.addDir("Pictures", dir)
 }
+*/
