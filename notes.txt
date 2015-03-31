@@ -1,0 +1,14 @@
++ use wifi direct hostname on android (how to find/access value ?) as device name
++ create config file (Android only) with dir values etc, when 1st time / does not exist
++ to edit config:
+  a) GET/PUT http services, through simple go app on PC, manually edit file
+  b) web form on androidPush http server, manually edit file (cf web server tut, 'blog')
+  c) Go PC app with GUI
+  nb: config edition does not happen often .. K.I.S.S !?
++ Android app: 
+  + deal with app life stages (start,sleep etc ?)
+  -> the http & mppq servers keep running after we exit the main activity
+    ? have a 'press back again to exit' thing ?
+    ? have a Close button ?
+    ? auto close after push completed?
+    
