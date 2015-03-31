@@ -1,5 +1,5 @@
 AndroidPush project 
-Copyright 2014 Philippe Quesnel
+Copyright 2014 Philippe Quesnel  
 is Licensed under the Academic Free License version 3.0  
 see License.txt or License.html 
 
