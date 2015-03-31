@@ -6,6 +6,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
 
 	_ "github.com/phques/androidpush/golib/goInterface/gen"
 	"github.com/phques/androidpush/golib/gopush"
@@ -26,7 +27,10 @@ func start() {
 	java.Init()
 
 	if *standalone {
-		gopush.InitAppFilesDir("files")
+		param := gopush.InitParam{}
+		param.Hostname, _ = os.Hostname()
+		param.AppFilesDir = "files"
+		gopush.Init(&param)
 		gopush.Start()
 	}
 }

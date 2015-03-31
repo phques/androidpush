@@ -28,12 +28,34 @@ var (
 	ConfigFilepath string // path of our config file (inside appFilesDir)
 )
 
+// InitParam holds the info pased from Android app to init gopush
+// (dup in goInterface ! because of circular ref))
+type InitParam struct {
+	Hostname    string // reported name to mppq service query responses
+	AppFilesDir string // app's files dir, we store config file there
+
+	// config file directories, used to populate config file 1st time
+	Music     string
+	Downloads string
+	Documents string
+	Pictures  string
+	Movies    string
+	Books     string
+	DCIM      string // for the Camera
+}
+
 //-----
 
 // Init initializes the Gopush lib
-//func Init(param *InitParam) {
-//	log.Println(*param)
-//}
+func Init(param *InitParam) error {
+	log.Println(*param)
+
+	if err := initAppFilesDir(param.AppFilesDir); err != nil {
+		return err
+	}
+
+	return nil
+}
 
 // Start() starts http & mppq servers, registers androidPush service with mppq.
 func Start() error {
@@ -70,7 +92,7 @@ func Stop() error {
 }
 
 // InitAppFilesDir initializes the app's files dir & copies config file there the 1st time
-func InitAppFilesDir(appFilesDir_ string) error {
+func initAppFilesDir(appFilesDir_ string) error {
 	// already done ?
 	if InitDone {
 		return nil

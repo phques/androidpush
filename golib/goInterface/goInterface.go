@@ -11,9 +11,8 @@ import (
 	"github.com/phques/androidpush/golib/gopush"
 )
 
-// circular ref prob between gopush and goInterface !!
-// this needs to be here for gobind,
-// but I need to pass an InitParam to gopush ... !!??
+// InitParam holds the info pased from Android app to init gopush
+// (dup in gopush ! because of circular ref))
 type InitParam struct {
 	Hostname    string // reported name to mppq service query responses
 	AppFilesDir string // app's files dir, we store config file there
@@ -39,7 +38,7 @@ func NewInitParam() *InitParam {
 func Init(param *InitParam) {
 	log.Println(*param)
 
-	//gopush.Init(param)
+	gopush.Init(param.dupInitParam())
 }
 
 // Start() starts http & mppq servers, registers androidPush service with mppq.
@@ -53,4 +52,19 @@ func Start() error {
 func Stop() error {
 	log.Println("goInterface.Stop")
 	return gopush.Stop()
+}
+
+// dupInitParam copies InitParam into gopush.InitParam
+func (i *InitParam) dupInitParam() *gopush.InitParam {
+	p := new(gopush.InitParam)
+	p.Hostname = i.Hostname
+	p.AppFilesDir = i.AppFilesDir
+	p.Music = i.Music
+	p.Downloads = i.Downloads
+	p.Documents = i.Documents
+	p.Pictures = i.Pictures
+	p.Movies = i.Movies
+	p.Books = i.Books
+	p.DCIM = i.DCIM
+	return p
 }
