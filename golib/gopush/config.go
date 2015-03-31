@@ -2,7 +2,7 @@
 // Copyright 2015 Philippe Quesnel
 // Licensed under the Academic Free License version 3.0
 
-package goInterface
+package gopush
 
 import (
 	"encoding/json"
@@ -16,13 +16,6 @@ type Config struct {
 	// config file directories, used to populate config file 1st time
 	// ie ["Books"]("~/Books", "~/Calibre/lib/books")
 	Dirs map[string][]string
-
-	//	Books     []string
-	//	Documents []string
-	//	Downloads []string
-	//	Movies    []string
-	//	Music     []string
-	//	Pictures  []string
 }
 
 func (cfg *Config) Save() error {
@@ -47,29 +40,3 @@ func (cfg *Config) AddDir(name string, dir string) {
 	cfg.Dirs[name] = append(dirs, dir)
 
 }
-
-/*
-func (cfg *Config) AddBooks(dir string) {
-	cfg.addDir("Books", dir)
-}
-
-func (cfg *Config) AddDocuments(dir string) {
-	cfg.addDir("Documents", dir)
-}
-
-func (cfg *Config) AddDownloads(dir string) {
-	cfg.addDir("Downloads", dir)
-}
-
-func (cfg *Config) AddMovies(dir string) {
-	cfg.addDir("Movies", dir)
-}
-
-func (cfg *Config) AddMusic(dir string) {
-	cfg.addDir("Music", dir)
-}
-
-func (cfg *Config) AddPictures(dir string) {
-	cfg.addDir("Pictures", dir)
-}
-*/

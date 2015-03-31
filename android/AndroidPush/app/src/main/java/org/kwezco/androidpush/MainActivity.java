@@ -55,6 +55,7 @@ public class MainActivity extends ActionBarActivity {
 
         File filesDir = getFilesDir();
         initParam.setAppFilesDir(filesDir.getPath());
+        initParam.setDCIM(getDir(Environment.DIRECTORY_DCIM));
         initParam.setDocuments(getDir(Environment.DIRECTORY_DOCUMENTS));
         initParam.setDownloads(getDir(Environment.DIRECTORY_DOWNLOADS));
         initParam.setMovies(getDir(Environment.DIRECTORY_MOVIES));

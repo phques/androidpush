@@ -16,17 +16,6 @@ public abstract class GoInterface {
         Seq.send(DESCRIPTOR, CALL_Init, _in, _out);
     }
     
-    public static void InitAppFilesDir(String appFilesDir_) throws Exception {
-        go.Seq _in = new go.Seq();
-        go.Seq _out = new go.Seq();
-        _in.writeUTF16(appFilesDir_);
-        Seq.send(DESCRIPTOR, CALL_InitAppFilesDir, _in, _out);
-        String _err = _out.readUTF16();
-        if (_err != null) {
-            throw new Exception(_err);
-        }
-    }
-    
     public static final class InitParam implements go.Seq.Object {
         private static final String DESCRIPTOR = "go.goInterface.InitParam";
         private static final int FIELD_Hostname_GET = 0x00f;
@@ -45,6 +34,8 @@ public abstract class GoInterface {
         private static final int FIELD_Movies_SET = 0x61f;
         private static final int FIELD_Books_GET = 0x70f;
         private static final int FIELD_Books_SET = 0x71f;
+        private static final int FIELD_DCIM_GET = 0x80f;
+        private static final int FIELD_DCIM_SET = 0x81f;
         
         private go.Seq.Ref ref;
         
@@ -176,6 +167,21 @@ public abstract class GoInterface {
             in.writeUTF16(v);
             Seq.send(DESCRIPTOR, FIELD_Books_SET, in, out);
         }
+        public String getDCIM() {
+            Seq in = new Seq();
+            Seq out = new Seq();
+            in.writeRef(ref);
+            Seq.send(DESCRIPTOR, FIELD_DCIM_GET, in, out);
+            return out.readUTF16();
+        }
+        
+        public void setDCIM(String v) {
+            Seq in = new Seq();
+            Seq out = new Seq();
+            in.writeRef(ref);
+            in.writeUTF16(v);
+            Seq.send(DESCRIPTOR, FIELD_DCIM_SET, in, out);
+        }
         
         @Override public boolean equals(Object o) {
             if (o == null || !(o instanceof InitParam)) {
@@ -254,11 +260,20 @@ public abstract class GoInterface {
             } else if (!thisBooks.equals(thatBooks)) {
                 return false;
             }
+            String thisDCIM = getDCIM();
+            String thatDCIM = that.getDCIM();
+            if (thisDCIM == null) {
+                if (thatDCIM != null) {
+                    return false;
+                }
+            } else if (!thisDCIM.equals(thatDCIM)) {
+                return false;
+            }
             return true;
         }
         
         @Override public int hashCode() {
-            return java.util.Arrays.hashCode(new Object[] {getHostname(), getAppFilesDir(), getMusic(), getDownloads(), getDocuments(), getPictures(), getMovies(), getBooks()});
+            return java.util.Arrays.hashCode(new Object[] {getHostname(), getAppFilesDir(), getMusic(), getDownloads(), getDocuments(), getPictures(), getMovies(), getBooks(), getDCIM()});
         }
         
         @Override public String toString() {
@@ -272,6 +287,7 @@ public abstract class GoInterface {
             b.append("Pictures:").append(getPictures()).append(",");
             b.append("Movies:").append(getMovies()).append(",");
             b.append("Books:").append(getBooks()).append(",");
+            b.append("DCIM:").append(getDCIM()).append(",");
             return b.append("}").toString();
         }
         
@@ -307,9 +323,8 @@ public abstract class GoInterface {
     }
     
     private static final int CALL_Init = 1;
-    private static final int CALL_InitAppFilesDir = 2;
-    private static final int CALL_NewInitParam = 3;
-    private static final int CALL_Start = 4;
-    private static final int CALL_Stop = 5;
+    private static final int CALL_NewInitParam = 2;
+    private static final int CALL_Start = 3;
+    private static final int CALL_Stop = 4;
     private static final String DESCRIPTOR = "goInterface";
 }

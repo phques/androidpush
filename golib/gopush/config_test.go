@@ -2,7 +2,7 @@
 // Copyright 2015 Philippe Quesnel
 // Licensed under the Academic Free License version 3.0
 
-package goInterface
+package gopush
 
 import (
 	"os"
@@ -44,34 +44,10 @@ func TestConfigAddDir(t *testing.T) {
 
 	dir, ok := cfg.Dirs["Books"]
 	if !ok {
-		t.Error("Books entry not found ok=false")
+		t.Error("Books entry not found, ok=false")
 	} else if len(dir) != 1 || dir[0] != "/home/philippe/Books" {
 		t.Error("Books entry list does not contain books dir")
 	}
-}
-
-func _testConfigAdds(t *testing.T) {
-	/*
-		cfg := makeConfig()
-		if cfg.Books[0] != books {
-			t.Error("bad books")
-		}
-		if cfg.Documents[0] != documents {
-			t.Error("bad documents")
-		}
-		if cfg.Downloads[0] != downloads {
-			t.Error("bad downloads")
-		}
-		if cfg.Movies[0] != movies {
-			t.Error("bad movies")
-		}
-		if cfg.Music[0] != music {
-			t.Error("bad music")
-		}
-		if cfg.Pictures[0] != pictures {
-			t.Error("bad pictures")
-		}
-	*/
 }
 
 func TestSaveConfig(t *testing.T) {

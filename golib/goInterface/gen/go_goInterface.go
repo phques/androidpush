@@ -16,16 +16,6 @@ func proxy_Init(out, in *seq.Buffer) {
 	goInterface.Init(param_param)
 }
 
-func proxy_InitAppFilesDir(out, in *seq.Buffer) {
-	param_appFilesDir_ := in.ReadUTF16()
-	err := goInterface.InitAppFilesDir(param_appFilesDir_)
-	if err == nil {
-		out.WriteUTF16("")
-	} else {
-		out.WriteUTF16(err.Error())
-	}
-}
-
 const (
 	proxyInitParamDescriptor         = "go.goInterface.InitParam"
 	proxyInitParamHostnameGetCode    = 0x00f
@@ -44,6 +34,8 @@ const (
 	proxyInitParamMoviesSetCode      = 0x61f
 	proxyInitParamBooksGetCode       = 0x70f
 	proxyInitParamBooksSetCode       = 0x71f
+	proxyInitParamDCIMGetCode        = 0x80f
+	proxyInitParamDCIMSetCode        = 0x81f
 )
 
 type proxyInitParam seq.Ref
@@ -144,6 +136,18 @@ func proxyInitParamBooksGet(out, in *seq.Buffer) {
 	out.WriteUTF16(v)
 }
 
+func proxyInitParamDCIMSet(out, in *seq.Buffer) {
+	ref := in.ReadRef()
+	v := in.ReadUTF16()
+	ref.Get().(*goInterface.InitParam).DCIM = v
+}
+
+func proxyInitParamDCIMGet(out, in *seq.Buffer) {
+	ref := in.ReadRef()
+	v := ref.Get().(*goInterface.InitParam).DCIM
+	out.WriteUTF16(v)
+}
+
 func init() {
 	seq.Register(proxyInitParamDescriptor, proxyInitParamHostnameSetCode, proxyInitParamHostnameSet)
 	seq.Register(proxyInitParamDescriptor, proxyInitParamHostnameGetCode, proxyInitParamHostnameGet)
@@ -161,6 +165,8 @@ func init() {
 	seq.Register(proxyInitParamDescriptor, proxyInitParamMoviesGetCode, proxyInitParamMoviesGet)
 	seq.Register(proxyInitParamDescriptor, proxyInitParamBooksSetCode, proxyInitParamBooksSet)
 	seq.Register(proxyInitParamDescriptor, proxyInitParamBooksGetCode, proxyInitParamBooksGet)
+	seq.Register(proxyInitParamDescriptor, proxyInitParamDCIMSetCode, proxyInitParamDCIMSet)
+	seq.Register(proxyInitParamDescriptor, proxyInitParamDCIMGetCode, proxyInitParamDCIMGet)
 }
 
 func proxy_NewInitParam(out, in *seq.Buffer) {
@@ -188,8 +194,7 @@ func proxy_Stop(out, in *seq.Buffer) {
 
 func init() {
 	seq.Register("goInterface", 1, proxy_Init)
-	seq.Register("goInterface", 2, proxy_InitAppFilesDir)
-	seq.Register("goInterface", 3, proxy_NewInitParam)
-	seq.Register("goInterface", 4, proxy_Start)
-	seq.Register("goInterface", 5, proxy_Stop)
+	seq.Register("goInterface", 2, proxy_NewInitParam)
+	seq.Register("goInterface", 3, proxy_Start)
+	seq.Register("goInterface", 4, proxy_Stop)
 }

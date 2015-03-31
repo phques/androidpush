@@ -2,7 +2,7 @@
 // Copyright 2015 Philippe Quesnel
 // Licensed under the Academic Free License version 3.0
 
-package goInterface
+package gopush
 
 import (
 	"log"
@@ -16,9 +16,9 @@ var (
 	httpListenPort int
 )
 
-// startHTTP starts a http.Serve() go routine, listening on a sys allocated local port
+// StartHTTP starts a http.Serve() go routine, listening on a sys allocated local port
 // The listener and it's port are saved in httpListener / httpListenPort
-func startHTTP() error {
+func StartHTTP() error {
 	// listen, on system assigned port
 	ln, err := net.Listen("tcp", ":0")
 	if err != nil {

@@ -7,8 +7,8 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/phques/androidpush/golib/goInterface"
 	_ "github.com/phques/androidpush/golib/goInterface/gen"
+	"github.com/phques/androidpush/golib/gopush"
 	"golang.org/x/mobile/app"
 	"golang.org/x/mobile/bind/java"
 )
@@ -26,8 +26,8 @@ func start() {
 	java.Init()
 
 	if *standalone {
-		goInterface.InitAppFilesDir("files")
-		goInterface.Start()
+		gopush.InitAppFilesDir("files")
+		gopush.Start()
 	}
 }
 
@@ -35,6 +35,6 @@ func stop() {
 	fmt.Println("main.stop")
 	if *standalone {
 		//ps: not really required since the app is closing anyways ;-)
-		goInterface.Stop()
+		gopush.Stop()
 	}
 }

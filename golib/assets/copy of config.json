@@ -1,20 +1,27 @@
-[
-    {   "Name" : "Music",
-        "Dirs"  : ["/home/kwez/Music"]
-    },
-    {   "Name" : "Downloads",
-        "Dirs"  : ["/home/kwez/Downloads"]
-    },
-    {   "Name" : "Pictures",
-        "Dirs"  : ["/home/kwez/Pictures"]
-    },
-    {   "Name" : "Movies",
-        "Dirs"  : ["/home/kwez/Videos"]
-    },
-    {   "Name" : "Documents",
-        "Dirs"  : ["/home/kwez/Documents"]
-    },
-    {   "Name" : "Books",
-        "Dirs"  : ["/home/kwez/Books"]
-    }
-]
+{
+  "Devicename": "lubuntu64Vbox",
+  "AppFilesDir": "files",
+  "Dirs": {
+    "Books": [
+      "/home/philippe/Books"
+    ],
+    "Documents": [
+      "/home/philippe/Documents"
+    ],
+    "Downloads": [
+      "/home/philippe/Downloads"
+    ],
+    "Movies": [
+      "/home/philippe/Movies"
+    ],
+    "Music": [
+      "/home/philippe/Music"
+    ],
+    "Pictures": [
+      "/home/philippe/Pictures"
+    ],
+	"DCIM": [
+	  "/home/philippe/Pictures"
+	]
+  }
+}
