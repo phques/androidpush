@@ -194,7 +194,7 @@ func ServeHTTPConfig(w http.ResponseWriter, r *http.Request) {
 		outfile, err := os.Create(ConfigFilepath)
 		if err != nil {
 			log.Printf("ServeHTTPConfig, error creating file [%v]: %v\n", ConfigFilepath, err)
-			http.NotFound(w, r)
+			http.Error(w, "Failed to save file", http.StatusInternalServerError)
 			return
 		}
 		defer outfile.Close()
@@ -209,5 +209,6 @@ func ServeHTTPConfig(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// invalid method
-	http.Error(w, http.ErrNotSupported.ErrorString, 405)
+	log.Println("ServeHTTPConfig, invalid method")
+	http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 }
