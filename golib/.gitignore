@@ -1,6 +1,8 @@
 libgojni.so
 golib
 files
+gopush/config_test.json
+
 # add back golib/goInterface/gen subdir
 # (skipped because of top level .gitignore)
 !gen/

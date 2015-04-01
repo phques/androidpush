@@ -24,16 +24,10 @@ public class MainActivity extends ActionBarActivity {
 
         // init Go & go lib
         initGoLib();
-//        try {
-//            File filesDir = getFilesDir();
-//            GoInterface.InitAppFilesDir(filesDir.getPath());
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
+
         // start http & mppq server
         try {
             GoInterface.Start();
-            //GoInterface.InitParam initParam = new GoInterface.InitParam();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -67,10 +61,6 @@ public class MainActivity extends ActionBarActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-
-//        initParam.setBooks(Environment.);
-//        initParam.setHostname();
     }
 
     @Override

@@ -18,24 +18,24 @@ public abstract class GoInterface {
     
     public static final class InitParam implements go.Seq.Object {
         private static final String DESCRIPTOR = "go.goInterface.InitParam";
-        private static final int FIELD_Hostname_GET = 0x00f;
-        private static final int FIELD_Hostname_SET = 0x01f;
+        private static final int FIELD_Devicename_GET = 0x00f;
+        private static final int FIELD_Devicename_SET = 0x01f;
         private static final int FIELD_AppFilesDir_GET = 0x10f;
         private static final int FIELD_AppFilesDir_SET = 0x11f;
-        private static final int FIELD_Music_GET = 0x20f;
-        private static final int FIELD_Music_SET = 0x21f;
-        private static final int FIELD_Downloads_GET = 0x30f;
-        private static final int FIELD_Downloads_SET = 0x31f;
+        private static final int FIELD_Books_GET = 0x20f;
+        private static final int FIELD_Books_SET = 0x21f;
+        private static final int FIELD_DCIM_GET = 0x30f;
+        private static final int FIELD_DCIM_SET = 0x31f;
         private static final int FIELD_Documents_GET = 0x40f;
         private static final int FIELD_Documents_SET = 0x41f;
-        private static final int FIELD_Pictures_GET = 0x50f;
-        private static final int FIELD_Pictures_SET = 0x51f;
+        private static final int FIELD_Downloads_GET = 0x50f;
+        private static final int FIELD_Downloads_SET = 0x51f;
         private static final int FIELD_Movies_GET = 0x60f;
         private static final int FIELD_Movies_SET = 0x61f;
-        private static final int FIELD_Books_GET = 0x70f;
-        private static final int FIELD_Books_SET = 0x71f;
-        private static final int FIELD_DCIM_GET = 0x80f;
-        private static final int FIELD_DCIM_SET = 0x81f;
+        private static final int FIELD_Music_GET = 0x70f;
+        private static final int FIELD_Music_SET = 0x71f;
+        private static final int FIELD_Pictures_GET = 0x80f;
+        private static final int FIELD_Pictures_SET = 0x81f;
         
         private go.Seq.Ref ref;
         
@@ -47,20 +47,20 @@ public abstract class GoInterface {
             throw new RuntimeException("internal error: cycle: cannot call concrete proxy");
         }
         
-        public String getHostname() {
+        public String getDevicename() {
             Seq in = new Seq();
             Seq out = new Seq();
             in.writeRef(ref);
-            Seq.send(DESCRIPTOR, FIELD_Hostname_GET, in, out);
+            Seq.send(DESCRIPTOR, FIELD_Devicename_GET, in, out);
             return out.readUTF16();
         }
         
-        public void setHostname(String v) {
+        public void setDevicename(String v) {
             Seq in = new Seq();
             Seq out = new Seq();
             in.writeRef(ref);
             in.writeUTF16(v);
-            Seq.send(DESCRIPTOR, FIELD_Hostname_SET, in, out);
+            Seq.send(DESCRIPTOR, FIELD_Devicename_SET, in, out);
         }
         public String getAppFilesDir() {
             Seq in = new Seq();
@@ -76,81 +76,6 @@ public abstract class GoInterface {
             in.writeRef(ref);
             in.writeUTF16(v);
             Seq.send(DESCRIPTOR, FIELD_AppFilesDir_SET, in, out);
-        }
-        public String getMusic() {
-            Seq in = new Seq();
-            Seq out = new Seq();
-            in.writeRef(ref);
-            Seq.send(DESCRIPTOR, FIELD_Music_GET, in, out);
-            return out.readUTF16();
-        }
-        
-        public void setMusic(String v) {
-            Seq in = new Seq();
-            Seq out = new Seq();
-            in.writeRef(ref);
-            in.writeUTF16(v);
-            Seq.send(DESCRIPTOR, FIELD_Music_SET, in, out);
-        }
-        public String getDownloads() {
-            Seq in = new Seq();
-            Seq out = new Seq();
-            in.writeRef(ref);
-            Seq.send(DESCRIPTOR, FIELD_Downloads_GET, in, out);
-            return out.readUTF16();
-        }
-        
-        public void setDownloads(String v) {
-            Seq in = new Seq();
-            Seq out = new Seq();
-            in.writeRef(ref);
-            in.writeUTF16(v);
-            Seq.send(DESCRIPTOR, FIELD_Downloads_SET, in, out);
-        }
-        public String getDocuments() {
-            Seq in = new Seq();
-            Seq out = new Seq();
-            in.writeRef(ref);
-            Seq.send(DESCRIPTOR, FIELD_Documents_GET, in, out);
-            return out.readUTF16();
-        }
-        
-        public void setDocuments(String v) {
-            Seq in = new Seq();
-            Seq out = new Seq();
-            in.writeRef(ref);
-            in.writeUTF16(v);
-            Seq.send(DESCRIPTOR, FIELD_Documents_SET, in, out);
-        }
-        public String getPictures() {
-            Seq in = new Seq();
-            Seq out = new Seq();
-            in.writeRef(ref);
-            Seq.send(DESCRIPTOR, FIELD_Pictures_GET, in, out);
-            return out.readUTF16();
-        }
-        
-        public void setPictures(String v) {
-            Seq in = new Seq();
-            Seq out = new Seq();
-            in.writeRef(ref);
-            in.writeUTF16(v);
-            Seq.send(DESCRIPTOR, FIELD_Pictures_SET, in, out);
-        }
-        public String getMovies() {
-            Seq in = new Seq();
-            Seq out = new Seq();
-            in.writeRef(ref);
-            Seq.send(DESCRIPTOR, FIELD_Movies_GET, in, out);
-            return out.readUTF16();
-        }
-        
-        public void setMovies(String v) {
-            Seq in = new Seq();
-            Seq out = new Seq();
-            in.writeRef(ref);
-            in.writeUTF16(v);
-            Seq.send(DESCRIPTOR, FIELD_Movies_SET, in, out);
         }
         public String getBooks() {
             Seq in = new Seq();
@@ -182,19 +107,94 @@ public abstract class GoInterface {
             in.writeUTF16(v);
             Seq.send(DESCRIPTOR, FIELD_DCIM_SET, in, out);
         }
+        public String getDocuments() {
+            Seq in = new Seq();
+            Seq out = new Seq();
+            in.writeRef(ref);
+            Seq.send(DESCRIPTOR, FIELD_Documents_GET, in, out);
+            return out.readUTF16();
+        }
+        
+        public void setDocuments(String v) {
+            Seq in = new Seq();
+            Seq out = new Seq();
+            in.writeRef(ref);
+            in.writeUTF16(v);
+            Seq.send(DESCRIPTOR, FIELD_Documents_SET, in, out);
+        }
+        public String getDownloads() {
+            Seq in = new Seq();
+            Seq out = new Seq();
+            in.writeRef(ref);
+            Seq.send(DESCRIPTOR, FIELD_Downloads_GET, in, out);
+            return out.readUTF16();
+        }
+        
+        public void setDownloads(String v) {
+            Seq in = new Seq();
+            Seq out = new Seq();
+            in.writeRef(ref);
+            in.writeUTF16(v);
+            Seq.send(DESCRIPTOR, FIELD_Downloads_SET, in, out);
+        }
+        public String getMovies() {
+            Seq in = new Seq();
+            Seq out = new Seq();
+            in.writeRef(ref);
+            Seq.send(DESCRIPTOR, FIELD_Movies_GET, in, out);
+            return out.readUTF16();
+        }
+        
+        public void setMovies(String v) {
+            Seq in = new Seq();
+            Seq out = new Seq();
+            in.writeRef(ref);
+            in.writeUTF16(v);
+            Seq.send(DESCRIPTOR, FIELD_Movies_SET, in, out);
+        }
+        public String getMusic() {
+            Seq in = new Seq();
+            Seq out = new Seq();
+            in.writeRef(ref);
+            Seq.send(DESCRIPTOR, FIELD_Music_GET, in, out);
+            return out.readUTF16();
+        }
+        
+        public void setMusic(String v) {
+            Seq in = new Seq();
+            Seq out = new Seq();
+            in.writeRef(ref);
+            in.writeUTF16(v);
+            Seq.send(DESCRIPTOR, FIELD_Music_SET, in, out);
+        }
+        public String getPictures() {
+            Seq in = new Seq();
+            Seq out = new Seq();
+            in.writeRef(ref);
+            Seq.send(DESCRIPTOR, FIELD_Pictures_GET, in, out);
+            return out.readUTF16();
+        }
+        
+        public void setPictures(String v) {
+            Seq in = new Seq();
+            Seq out = new Seq();
+            in.writeRef(ref);
+            in.writeUTF16(v);
+            Seq.send(DESCRIPTOR, FIELD_Pictures_SET, in, out);
+        }
         
         @Override public boolean equals(Object o) {
             if (o == null || !(o instanceof InitParam)) {
                 return false;
             }
             InitParam that = (InitParam)o;
-            String thisHostname = getHostname();
-            String thatHostname = that.getHostname();
-            if (thisHostname == null) {
-                if (thatHostname != null) {
+            String thisDevicename = getDevicename();
+            String thatDevicename = that.getDevicename();
+            if (thisDevicename == null) {
+                if (thatDevicename != null) {
                     return false;
                 }
-            } else if (!thisHostname.equals(thatHostname)) {
+            } else if (!thisDevicename.equals(thatDevicename)) {
                 return false;
             }
             String thisAppFilesDir = getAppFilesDir();
@@ -204,51 +204,6 @@ public abstract class GoInterface {
                     return false;
                 }
             } else if (!thisAppFilesDir.equals(thatAppFilesDir)) {
-                return false;
-            }
-            String thisMusic = getMusic();
-            String thatMusic = that.getMusic();
-            if (thisMusic == null) {
-                if (thatMusic != null) {
-                    return false;
-                }
-            } else if (!thisMusic.equals(thatMusic)) {
-                return false;
-            }
-            String thisDownloads = getDownloads();
-            String thatDownloads = that.getDownloads();
-            if (thisDownloads == null) {
-                if (thatDownloads != null) {
-                    return false;
-                }
-            } else if (!thisDownloads.equals(thatDownloads)) {
-                return false;
-            }
-            String thisDocuments = getDocuments();
-            String thatDocuments = that.getDocuments();
-            if (thisDocuments == null) {
-                if (thatDocuments != null) {
-                    return false;
-                }
-            } else if (!thisDocuments.equals(thatDocuments)) {
-                return false;
-            }
-            String thisPictures = getPictures();
-            String thatPictures = that.getPictures();
-            if (thisPictures == null) {
-                if (thatPictures != null) {
-                    return false;
-                }
-            } else if (!thisPictures.equals(thatPictures)) {
-                return false;
-            }
-            String thisMovies = getMovies();
-            String thatMovies = that.getMovies();
-            if (thisMovies == null) {
-                if (thatMovies != null) {
-                    return false;
-                }
-            } else if (!thisMovies.equals(thatMovies)) {
                 return false;
             }
             String thisBooks = getBooks();
@@ -269,25 +224,70 @@ public abstract class GoInterface {
             } else if (!thisDCIM.equals(thatDCIM)) {
                 return false;
             }
+            String thisDocuments = getDocuments();
+            String thatDocuments = that.getDocuments();
+            if (thisDocuments == null) {
+                if (thatDocuments != null) {
+                    return false;
+                }
+            } else if (!thisDocuments.equals(thatDocuments)) {
+                return false;
+            }
+            String thisDownloads = getDownloads();
+            String thatDownloads = that.getDownloads();
+            if (thisDownloads == null) {
+                if (thatDownloads != null) {
+                    return false;
+                }
+            } else if (!thisDownloads.equals(thatDownloads)) {
+                return false;
+            }
+            String thisMovies = getMovies();
+            String thatMovies = that.getMovies();
+            if (thisMovies == null) {
+                if (thatMovies != null) {
+                    return false;
+                }
+            } else if (!thisMovies.equals(thatMovies)) {
+                return false;
+            }
+            String thisMusic = getMusic();
+            String thatMusic = that.getMusic();
+            if (thisMusic == null) {
+                if (thatMusic != null) {
+                    return false;
+                }
+            } else if (!thisMusic.equals(thatMusic)) {
+                return false;
+            }
+            String thisPictures = getPictures();
+            String thatPictures = that.getPictures();
+            if (thisPictures == null) {
+                if (thatPictures != null) {
+                    return false;
+                }
+            } else if (!thisPictures.equals(thatPictures)) {
+                return false;
+            }
             return true;
         }
         
         @Override public int hashCode() {
-            return java.util.Arrays.hashCode(new Object[] {getHostname(), getAppFilesDir(), getMusic(), getDownloads(), getDocuments(), getPictures(), getMovies(), getBooks(), getDCIM()});
+            return java.util.Arrays.hashCode(new Object[] {getDevicename(), getAppFilesDir(), getBooks(), getDCIM(), getDocuments(), getDownloads(), getMovies(), getMusic(), getPictures()});
         }
         
         @Override public String toString() {
             StringBuilder b = new StringBuilder();
             b.append("InitParam").append("{");
-            b.append("Hostname:").append(getHostname()).append(",");
+            b.append("Devicename:").append(getDevicename()).append(",");
             b.append("AppFilesDir:").append(getAppFilesDir()).append(",");
-            b.append("Music:").append(getMusic()).append(",");
-            b.append("Downloads:").append(getDownloads()).append(",");
-            b.append("Documents:").append(getDocuments()).append(",");
-            b.append("Pictures:").append(getPictures()).append(",");
-            b.append("Movies:").append(getMovies()).append(",");
             b.append("Books:").append(getBooks()).append(",");
             b.append("DCIM:").append(getDCIM()).append(",");
+            b.append("Documents:").append(getDocuments()).append(",");
+            b.append("Downloads:").append(getDownloads()).append(",");
+            b.append("Movies:").append(getMovies()).append(",");
+            b.append("Music:").append(getMusic()).append(",");
+            b.append("Pictures:").append(getPictures()).append(",");
             return b.append("}").toString();
         }
         

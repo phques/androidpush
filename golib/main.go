@@ -5,7 +5,7 @@ package main
 
 import (
 	"flag"
-	"fmt"
+	"log"
 	"os"
 
 	_ "github.com/phques/androidpush/golib/goInterface/gen"
@@ -17,28 +17,42 @@ import (
 var standalone = flag.Bool("standalone", false, "running as a stand alone pgm")
 
 func main() {
-	fmt.Println("main")
+	log.Println("main")
 	flag.Parse()
 	app.Run(app.Callbacks{Start: start, Stop: stop})
 }
 
 func start() {
-	fmt.Println("main.start")
+	log.Println("main.start")
 	java.Init()
 
 	if *standalone {
-		param := gopush.InitParam{}
-		param.Hostname, _ = os.Hostname()
-		param.AppFilesDir = "files"
-		gopush.Init(&param)
+		param := makeStdaloneParam()
+		gopush.Init(param)
 		gopush.Start()
 	}
 }
 
 func stop() {
-	fmt.Println("main.stop")
+	log.Println("main.stop")
 	if *standalone {
 		//ps: not really required since the app is closing anyways ;-)
 		gopush.Stop()
 	}
+}
+
+// makeStdaloneParam create a InitParam for use when running standalone
+// config file in "files" subdir, all root dirs under home/philippe
+func makeStdaloneParam() *gopush.InitParam {
+	param := &gopush.InitParam{}
+	param.Devicename, _ = os.Hostname()
+	param.AppFilesDir = "files"
+	param.Books = "/home/philippe/Books"
+	param.DCIM = "/home/philippe/Pictures"
+	param.Documents = "/home/philippe/Documents"
+	param.Downloads = "/home/philippe/Downloads"
+	param.Movies = "/home/philippe/Movies"
+	param.Music = "/home/philippe/Music"
+	param.Pictures = "/home/philippe/Pictures"
+	return param
 }

@@ -7,13 +7,11 @@ package gopush
 
 import (
 	"errors"
-	"io"
 	"log"
 	"os"
 	"path/filepath"
 
 	"github.com/phques/mppq"
-	"golang.org/x/mobile/app"
 )
 
 const (
@@ -21,8 +19,10 @@ const (
 )
 
 var (
-	InitDone     bool = false
+	initDone     bool = false
+	started      bool = false
 	mppqProvider *mppq.Provider
+	config       *Config
 
 	AppFilesDir    string // directory where our app's file are
 	ConfigFilepath string // path of our config file (inside appFilesDir)
@@ -31,28 +31,48 @@ var (
 // InitParam holds the info pased from Android app to init gopush
 // (dup in goInterface ! because of circular ref))
 type InitParam struct {
-	Hostname    string // reported name to mppq service query responses
+	Devicename  string // reported name to mppq service query responses
 	AppFilesDir string // app's files dir, we store config file there
 
 	// config file directories, used to populate config file 1st time
-	Music     string
-	Downloads string
-	Documents string
-	Pictures  string
-	Movies    string
 	Books     string
 	DCIM      string // for the Camera
+	Documents string
+	Downloads string
+	Movies    string
+	Music     string
+	Pictures  string
 }
 
 //-----
 
 // Init initializes the Gopush lib
 func Init(param *InitParam) error {
-	log.Println(*param)
-
-	if err := initAppFilesDir(param.AppFilesDir); err != nil {
-		return err
+	log.Println("gopush.Init")
+	// already done ?
+	if initDone {
+		log.Println(" .. already done")
+		return nil
 	}
+	initDone = true
+
+	// set app's files dir & config filename
+	initAppFilesDir(param.AppFilesDir)
+
+	// Create initial config.json in appFilesDir if does not exists
+	if _, err := os.Stat(ConfigFilepath); err != nil {
+		if err = createConfigFile(param); err != nil {
+			return err
+		}
+	}
+
+	// load config
+	log.Println("loading config from ", ConfigFilepath)
+	config = &Config{}
+	config.Load(ConfigFilepath)
+
+	//## debug
+	log.Printf("config %+v\n", config)
 
 	return nil
 }
@@ -60,6 +80,11 @@ func Init(param *InitParam) error {
 // Start() starts http & mppq servers, registers androidPush service with mppq.
 func Start() error {
 	log.Println("gopush.Start")
+	if started {
+		log.Println(" .. already done")
+		return nil
+	}
+	started = true
 
 	// start http server
 	if err := StartHTTP(); err != nil {
@@ -91,62 +116,38 @@ func Stop() error {
 	return mppqProvider.Stop()
 }
 
-// InitAppFilesDir initializes the app's files dir & copies config file there the 1st time
-func initAppFilesDir(appFilesDir_ string) error {
-	// already done ?
-	if InitDone {
-		return nil
-	}
-	InitDone = true
-
-	//## debug
-	dir, _ := os.Getwd()
-	log.Printf("cwd: %v\n", dir)
+// initAppFilesDir initializes the app's files dir values
+func initAppFilesDir(appFilesDir_ string) {
 
 	AppFilesDir = appFilesDir_
 
 	// setup config file path
 	ConfigFilepath = filepath.Join(AppFilesDir, configFilename)
 	log.Print("config file:", ConfigFilepath)
-
-	// create initial (copy from assets) config.json in appFilesDir if does not exists
-	// does config file exist in app files dir?
-	if _, err := os.Stat(ConfigFilepath); err != nil {
-		return copyConfigFile()
-	}
-
-	return nil
 }
 
-//--- utils -----
+// Create config file from InitParam
+func createConfigFile(param *InitParam) error {
+	log.Println("creating config file ", ConfigFilepath)
+	cfg := createConfigFromInitParam(param)
+	return cfg.Save(ConfigFilepath)
+}
 
-// copy config file from assets to app filesdir
-func copyConfigFile() (err error) {
-	// open src config file from assets
-	srcFile, err := app.Open(configFilename)
-	if err != nil {
-		log.Printf("copyConfigFile, error opening source : %v\n", err)
-		return
-	}
-	defer srcFile.Close()
+// createConfigFromInitParam creates a *Config from a *InitParam
+func createConfigFromInitParam(param *InitParam) *Config {
+	cfg := &Config{}
+	cfg.AppFilesDir = param.AppFilesDir
+	cfg.Devicename = param.Devicename
 
-	// create/open dest config file
-	destFile, err := os.Create(ConfigFilepath)
-	if err != nil {
-		log.Printf("copyConfigFile, error opening dest : %v\n", err)
-		return
-	}
-	defer destFile.Close()
+	cfg.AddDir("Books", param.Books)
+	cfg.AddDir("DCIM", param.DCIM)
+	cfg.AddDir("Documents", param.Documents)
+	cfg.AddDir("Downloads", param.Downloads)
+	cfg.AddDir("Movies", param.Movies)
+	cfg.AddDir("Music", param.Music)
+	cfg.AddDir("Pictures", param.Pictures)
 
-	// copy
-	nbCopied, err := io.Copy(destFile, srcFile)
-	if err == nil {
-		log.Printf("copyConfigFile, copied %v bytes\n", nbCopied)
-	} else {
-		log.Printf("copyConfigFile, error copying : %v\n", err)
-	}
-
-	return nil
+	return cfg
 }
 
 // register a service we provide with mppq

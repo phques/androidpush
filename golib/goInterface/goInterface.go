@@ -14,17 +14,17 @@ import (
 // InitParam holds the info pased from Android app to init gopush
 // (dup in gopush ! because of circular ref))
 type InitParam struct {
-	Hostname    string // reported name to mppq service query responses
+	Devicename  string // reported name to mppq service query responses
 	AppFilesDir string // app's files dir, we store config file there
 
 	// config file directories, used to populate config file 1st time
-	Music     string
-	Downloads string
-	Documents string
-	Pictures  string
-	Movies    string
 	Books     string
 	DCIM      string // for the Camera
+	Documents string
+	Downloads string
+	Movies    string
+	Music     string
+	Pictures  string
 }
 
 //------
@@ -36,8 +36,7 @@ func NewInitParam() *InitParam {
 
 // Init initializes the Gopush library
 func Init(param *InitParam) {
-	log.Println(*param)
-
+	log.Println("goInterface.Init")
 	gopush.Init(param.dupInitParam())
 }
 
@@ -57,7 +56,7 @@ func Stop() error {
 // dupInitParam copies InitParam into gopush.InitParam
 func (i *InitParam) dupInitParam() *gopush.InitParam {
 	p := new(gopush.InitParam)
-	p.Hostname = i.Hostname
+	p.Devicename = i.Devicename
 	p.AppFilesDir = i.AppFilesDir
 	p.Music = i.Music
 	p.Downloads = i.Downloads
