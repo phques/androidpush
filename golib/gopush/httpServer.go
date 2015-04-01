@@ -20,7 +20,8 @@ var (
 // The listener and it's port are saved in httpListener / httpListenPort
 func StartHTTP() error {
 	// listen, on system assigned port
-	ln, err := net.Listen("tcp", ":0")
+	ln, err := net.Listen("tcp", ":1440") //## debug
+	//ln, err := net.Listen("tcp", ":0")
 	if err != nil {
 		log.Printf("Failed to start HTTP Server : %v\n", err)
 		return err

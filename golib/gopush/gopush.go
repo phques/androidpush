@@ -7,7 +7,9 @@ package gopush
 
 import (
 	"errors"
+	"io"
 	"log"
+	"net/http"
 	"os"
 	"path/filepath"
 
@@ -102,6 +104,9 @@ func Start() error {
 		return err
 	}
 
+	//## test debug
+	http.HandleFunc("/androidPush/config", ServeHTTPConfig)
+
 	return nil
 }
 
@@ -166,4 +171,43 @@ func registerMppqService(serviceName string) error {
 	})
 
 	return err
+}
+
+// ServeHTTPConfig handles HTTP GET & PUT for our config file
+// curl localhost:1440/androidPush/config
+// curl --upload-file ./config.json http://localhost:1440/androidPush/config
+func ServeHTTPConfig(w http.ResponseWriter, r *http.Request) {
+	log.Println("ServeHTTPConfig", r.Method)
+
+	// GET config file
+	if r.Method == "GET" {
+		log.Println("ServeHTTPConfig GET ", ConfigFilepath)
+		http.ServeFile(w, r, ConfigFilepath)
+		return
+	}
+
+	// PUT: save config file
+	if r.Method == "PUT" {
+		log.Println("ServeHTTPConfig PUT ", ConfigFilepath)
+
+		// open output file
+		outfile, err := os.Create(ConfigFilepath)
+		if err != nil {
+			log.Printf("ServeHTTPConfig, error creating file [%v]: %v\n", ConfigFilepath, err)
+			http.NotFound(w, r)
+			return
+		}
+		defer outfile.Close()
+
+		// copy data to output file
+		written, err := io.Copy(outfile, r.Body)
+		if err != nil {
+			log.Printf("ServeHTTPConfig, error copying to file [%v]: %v\n", ConfigFilepath, err)
+			return
+		}
+		log.Printf("ServeHTTPConfig, wrote %v bytes\n", written)
+	}
+
+	// invalid method
+	http.Error(w, http.ErrNotSupported.ErrorString, 405)
 }
