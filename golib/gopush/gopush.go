@@ -17,7 +17,8 @@ import (
 )
 
 const (
-	configFilename string = "config.json"
+	configFilename  string = "config.json"
+	mppqServiceName string = "androidPush"
 )
 
 var (
@@ -73,9 +74,6 @@ func Init(param *InitParam) error {
 	config = &Config{}
 	config.Load(ConfigFilepath)
 
-	//## debug
-	log.Printf("config %+v\n", config)
-
 	return nil
 }
 
@@ -100,12 +98,19 @@ func Start() error {
 	}
 
 	// register androidPush
-	if err := registerMppqService("androidPush"); err != nil {
+	if err := registerMppqService(mppqServiceName); err != nil {
 		return err
 	}
 
-	//## test debug
+	// register GET/PUT handler for config file
 	http.HandleFunc("/androidPush/config", ServeHTTPConfig)
+
+	//## test debug
+	docsDir := config.Dirs["Documents"][0]
+	log.Println(docsDir)
+	docServer := http.FileServer(http.Dir(docsDir))
+	//docServer := http.FileServer(http.Dir("/home/philippe/Documents"))
+	http.Handle("/androidPush/Documents/", http.StripPrefix("/androidPush/Documents/", docServer))
 
 	return nil
 }
@@ -161,11 +166,13 @@ func registerMppqService(serviceName string) error {
 	log.Println("registerMppqService", serviceName)
 
 	// register a service (mppqProvider must be started)
-	//## PQ TODO use 'deviceName' from config
-	providerName, _ := os.Hostname() // returns 'localhost' on my Nexus 5/7
+	deviceName := config.Devicename
+	if deviceName == "" {
+		deviceName, _ = os.Hostname() // returns 'localhost' on my Nexus 5/7
+	}
 	err := mppqProvider.AddService(mppq.ServiceDef{
 		ServiceName:  serviceName,
-		ProviderName: providerName,
+		ProviderName: deviceName,
 		HostPort:     httpListenPort,
 		Protocol:     "jsonhttp",
 	})
@@ -174,41 +181,56 @@ func registerMppqService(serviceName string) error {
 }
 
 // ServeHTTPConfig handles HTTP GET & PUT for our config file
-// curl localhost:1440/androidPush/config
-// curl --upload-file ./config.json http://localhost:1440/androidPush/config
+// GET: curl localhost:1440/androidPush/config -o config.jspn
+// PUT: curl --upload-file ./config.json http://localhost:1440/androidPush/config
 func ServeHTTPConfig(w http.ResponseWriter, r *http.Request) {
 	log.Println("ServeHTTPConfig", r.Method)
 
 	// GET config file
 	if r.Method == "GET" {
-		log.Println("ServeHTTPConfig GET ", ConfigFilepath)
+		log.Println("  GET ", ConfigFilepath)
 		http.ServeFile(w, r, ConfigFilepath)
 		return
 	}
 
 	// PUT: save config file
 	if r.Method == "PUT" {
-		log.Println("ServeHTTPConfig PUT ", ConfigFilepath)
+		log.Println("  PUT ", ConfigFilepath)
 
-		// open output file
-		outfile, err := os.Create(ConfigFilepath)
-		if err != nil {
-			log.Printf("ServeHTTPConfig, error creating file [%v]: %v\n", ConfigFilepath, err)
-			http.Error(w, "Failed to save file", http.StatusInternalServerError)
-			return
-		}
-		defer outfile.Close()
+		if saveConfig(w, r) {
+			// re-read config (will that work, outfile is not closed?)
+			config.Load(ConfigFilepath)
 
-		// copy data to output file
-		written, err := io.Copy(outfile, r.Body)
-		if err != nil {
-			log.Printf("ServeHTTPConfig, error copying to file [%v]: %v\n", ConfigFilepath, err)
-			return
+			// re-register mppq androidPush (devicename might have changed)
+			registerMppqService(mppqServiceName)
 		}
-		log.Printf("ServeHTTPConfig, wrote %v bytes\n", written)
+
+		return
 	}
 
 	// invalid method
-	log.Println("ServeHTTPConfig, invalid method")
+	log.Println("ServeHTTPConfig, invalid method", r.Method)
 	http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+}
+
+func saveConfig(w http.ResponseWriter, r *http.Request) bool {
+	// open output file
+	outfile, err := os.Create(ConfigFilepath)
+	if err != nil {
+		log.Printf("ServeHTTPConfig, error creating file [%v]: %v\n", ConfigFilepath, err)
+		http.Error(w, "Failed to create file", http.StatusInternalServerError)
+		return false
+	}
+	defer outfile.Close()
+
+	// copy data to output file
+	written, err := io.Copy(outfile, r.Body)
+	if err != nil {
+		log.Printf("ServeHTTPConfig, error copying to file [%v]: %v\n", ConfigFilepath, err)
+		http.Error(w, "Failed to save file", http.StatusInternalServerError)
+		return false
+	}
+
+	log.Printf("ServeHTTPConfig, wrote %v bytes\n", written)
+	return true
 }
