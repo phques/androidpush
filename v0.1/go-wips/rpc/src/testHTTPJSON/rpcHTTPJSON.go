@@ -1,3 +1,4 @@
+// Note: this uses a 'patched' version net/rpc & net/rpc/json that supports jsonrpc HTTP
 package main
 
 import (
@@ -6,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"net/rpc"
+	"net/rpc/jsonrpc"
 	"time"
 )
 
@@ -15,7 +17,7 @@ func startServer() {
 	server := rpc.NewServer()
 	server.Register(arith)
 
-	server.HandleHTTP(rpc.DefaultRPCPath, rpc.DefaultDebugPath)
+	jsonrpc.HandleHTTPDefault(server)
 	http.ListenAndServe(":8080", nil)
 
 }
@@ -24,7 +26,7 @@ func main() {
 	go startServer()
 	time.Sleep(time.Duration(100) * time.Millisecond)
 
-	client, err := rpc.DialHTTP("tcp", ":8080")
+	client, err := jsonrpc.DialHTTP("tcp", ":8080")
 	if err != nil {
 		panic(err)
 	}
@@ -39,4 +41,6 @@ func main() {
 	}
 	fmt.Printf("Arith: %d*%d=%d\n", args.A, args.B, reply)
 
+	//##test debug, so we can check http debug
+	select {}
 }
