@@ -9,11 +9,15 @@ import go.Seq;
 public abstract class GoInterface {
     private GoInterface() {} // uninstantiable
     
-    public static void Init(InitParam param) {
+    public static void Init(InitParam param) throws Exception {
         go.Seq _in = new go.Seq();
         go.Seq _out = new go.Seq();
         _in.writeRef(param.ref());
         Seq.send(DESCRIPTOR, CALL_Init, _in, _out);
+        String _err = _out.readUTF16();
+        if (_err != null) {
+            throw new Exception(_err);
+        }
     }
     
     public static final class InitParam implements go.Seq.Object {

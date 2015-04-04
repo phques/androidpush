@@ -13,7 +13,12 @@ func proxy_Init(out, in *seq.Buffer) {
 	// Must be a Go object
 	param_param_ref := in.ReadRef()
 	param_param := param_param_ref.Get().(*goInterface.InitParam)
-	goInterface.Init(param_param)
+	err := goInterface.Init(param_param)
+	if err == nil {
+		out.WriteUTF16("")
+	} else {
+		out.WriteUTF16(err.Error())
+	}
 }
 
 const (

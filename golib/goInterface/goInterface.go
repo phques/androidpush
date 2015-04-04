@@ -35,9 +35,9 @@ func NewInitParam() *InitParam {
 }
 
 // Init initializes the Gopush library
-func Init(param *InitParam) {
+func Init(param *InitParam) error {
 	log.Println("goInterface.Init")
-	gopush.Init(param.dupInitParam())
+	return gopush.Init(param.dupInitParam())
 }
 
 // Start() starts http & mppq servers, registers androidPush service with mppq.

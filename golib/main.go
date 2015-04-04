@@ -28,8 +28,9 @@ func start() {
 
 	if *standalone {
 		param := makeStdaloneParam()
-		gopush.Init(param)
-		gopush.Start()
+		if err := gopush.Init(param); err == nil {
+			gopush.Start()
+		}
 	}
 }
 

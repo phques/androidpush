@@ -60,11 +60,22 @@ func Init(param *InitParam) error {
 	initDone = true
 
 	// set app's files dir & config filename
-	initAppFilesDir(param.AppFilesDir)
+	if err := initAppFilesDir(param.AppFilesDir); err != nil {
+		return err
+	}
 
 	// Create initial config.json in appFilesDir if does not exists
-	if _, err := os.Stat(ConfigFilepath); err != nil {
-		if err = createConfigFile(param); err != nil {
+	// (we checked that file's dir is Ok in Init)
+	_, err := os.Stat(ConfigFilepath)
+	if err != nil {
+		// if doesnt exist, create it
+		if os.IsNotExist(err) {
+			if err = createConfigFile(param); err != nil {
+				return err
+			}
+		} else {
+			// other stat() error
+			log.Printf("stat(%v) error: %v\n", ConfigFilepath, err)
 			return err
 		}
 	}
@@ -72,7 +83,9 @@ func Init(param *InitParam) error {
 	// load config
 	log.Println("loading config from ", ConfigFilepath)
 	config = &Config{}
-	config.Load(ConfigFilepath)
+	if err = config.Load(ConfigFilepath); err != nil {
+		log.Println("config.Load error : ", err)
+	}
 
 	return nil
 }
@@ -127,13 +140,20 @@ func Stop() error {
 }
 
 // initAppFilesDir initializes the app's files dir values
-func initAppFilesDir(appFilesDir_ string) {
+func initAppFilesDir(appFilesDir_ string) error {
+	_, err := os.Stat(appFilesDir_)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
 
 	AppFilesDir = appFilesDir_
 
 	// setup config file path
 	ConfigFilepath = filepath.Join(AppFilesDir, configFilename)
 	log.Print("config file:", ConfigFilepath)
+
+	return nil
 }
 
 // Create config file from InitParam
@@ -181,7 +201,7 @@ func registerMppqService(serviceName string) error {
 }
 
 // ServeHTTPConfig handles HTTP GET & PUT for our config file
-// GET: curl localhost:1440/androidPush/config -o config.jspn
+// GET: curl localhost:1440/androidPush/config -o config.json
 // PUT: curl --upload-file ./config.json http://localhost:1440/androidPush/config
 func ServeHTTPConfig(w http.ResponseWriter, r *http.Request) {
 	log.Println("ServeHTTPConfig", r.Method)

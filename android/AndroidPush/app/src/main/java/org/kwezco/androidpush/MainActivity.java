@@ -22,11 +22,10 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // init Go & go lib
-        initGoLib();
-
         // start http & mppq server
         try {
+            // init Go & go lib
+            initGoLib();
             GoInterface.Start();
         } catch (Exception e) {
             e.printStackTrace();
@@ -38,7 +37,7 @@ public class MainActivity extends ActionBarActivity {
         return dir.getPath();
     }
 
-    protected void initGoLib() {
+    protected void initGoLib() throws Exception {
         // 1st, init the Go runtime
         Context context = getApplicationContext();
         Go.init(context);
@@ -55,12 +54,8 @@ public class MainActivity extends ActionBarActivity {
         initParam.setMovies(getDir(Environment.DIRECTORY_MOVIES));
         initParam.setMusic(getDir(Environment.DIRECTORY_MUSIC));
         initParam.setPictures(getDir(Environment.DIRECTORY_PICTURES));
-        try {
-            // call Init
-            GoInterface.Init(initParam);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        // call Init
+        GoInterface.Init(initParam);
     }
 
     @Override
