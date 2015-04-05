@@ -7,7 +7,6 @@ package gopush
 
 import (
 	"errors"
-	"io"
 	"log"
 	"net/http"
 	"os"
@@ -17,7 +16,6 @@ import (
 )
 
 const (
-	configFilename  string = "config.json"
 	mppqServiceName string = "androidPush"
 )
 
@@ -27,8 +25,8 @@ var (
 	mppqProvider *mppq.Provider
 	config       *Config
 
-	AppFilesDir    string // directory where our app's file are
-	ConfigFilepath string // path of our config file (inside appFilesDir)
+	appFilesDir    string // directory where our app's file are
+	configFilename string // path of our config file (inside appFilesDir)
 )
 
 // InitParam holds the info pased from Android app to init gopush
@@ -38,8 +36,9 @@ type InitParam struct {
 	AppFilesDir string // app's files dir, we store config file there
 
 	// config file directories, used to populate config file 1st time
-	Books     string
-	DCIM      string // for the Camera
+	Books     string // can be empty, will try as sibling of Documents
+	Camera    string // can be empty, will try under DCIM/Camera
+	DCIM      string
 	Documents string
 	Downloads string
 	Movies    string
@@ -66,25 +65,18 @@ func Init(param *InitParam) error {
 
 	// Create initial config.json in appFilesDir if does not exists
 	// (we checked that file's dir is Ok in Init)
-	_, err := os.Stat(ConfigFilepath)
-	if err != nil {
-		// if doesnt exist, create it
-		if os.IsNotExist(err) {
-			if err = createConfigFile(param); err != nil {
-				return err
-			}
-		} else {
-			// other stat() error
-			log.Printf("stat(%v) error: %v\n", ConfigFilepath, err)
+	if !isFile(configFilename) {
+		if err := createConfigFile(param); err != nil {
 			return err
 		}
 	}
 
 	// load config
-	log.Println("loading config from ", ConfigFilepath)
+	log.Println("loading config from ", configFilename)
 	config = &Config{}
-	if err = config.Load(ConfigFilepath); err != nil {
+	if err := config.Load(configFilename); err != nil {
 		log.Println("config.Load error : ", err)
+		return err
 	}
 
 	return nil
@@ -116,14 +108,7 @@ func Start() error {
 	}
 
 	// register GET/PUT handler for config file
-	http.HandleFunc("/androidPush/config", ServeHTTPConfig)
-
-	//## test debug
-	docsDir := config.Dirs["Documents"][0]
-	log.Println(docsDir)
-	docServer := http.FileServer(http.Dir(docsDir))
-	//docServer := http.FileServer(http.Dir("/home/philippe/Documents"))
-	http.Handle("/androidPush/Documents/", http.StripPrefix("/androidPush/Documents/", docServer))
+	http.HandleFunc("/androidPush/config", serveHTTPConfig)
 
 	return nil
 }
@@ -143,24 +128,24 @@ func Stop() error {
 func initAppFilesDir(appFilesDir_ string) error {
 	_, err := os.Stat(appFilesDir_)
 	if err != nil {
-		log.Println(err)
+		log.Println("Can't find app files dir: ", err)
 		return err
 	}
 
-	AppFilesDir = appFilesDir_
+	appFilesDir = appFilesDir_
 
 	// setup config file path
-	ConfigFilepath = filepath.Join(AppFilesDir, configFilename)
-	log.Print("config file:", ConfigFilepath)
+	configFilename = filepath.Join(appFilesDir, "config.json")
+	log.Print("config file: ", configFilename)
 
 	return nil
 }
 
 // Create config file from InitParam
 func createConfigFile(param *InitParam) error {
-	log.Println("creating config file ", ConfigFilepath)
+	log.Println("creating config file ", configFilename)
 	cfg := createConfigFromInitParam(param)
-	return cfg.Save(ConfigFilepath)
+	return cfg.Save(configFilename)
 }
 
 // createConfigFromInitParam creates a *Config from a *InitParam
@@ -169,8 +154,13 @@ func createConfigFromInitParam(param *InitParam) *Config {
 	cfg.AppFilesDir = param.AppFilesDir
 	cfg.Devicename = param.Devicename
 
+	checkBooksDir(param)
+	checkCameraDir(param)
+
 	cfg.AddDir("Books", param.Books)
+	cfg.AddDir("Camera", param.Camera)
 	cfg.AddDir("DCIM", param.DCIM)
+
 	cfg.AddDir("Documents", param.Documents)
 	cfg.AddDir("Downloads", param.Downloads)
 	cfg.AddDir("Movies", param.Movies)
@@ -180,6 +170,83 @@ func createConfigFromInitParam(param *InitParam) *Config {
 	return cfg
 }
 
+// checkBooksDir tries to find Books dir at same level as
+// Documents dir in param if it is empty
+func checkBooksDir(param *InitParam) {
+	// if Books dir empty
+	if len(param.Books) == 0 && len(param.Documents) != 0 {
+		// try "Books" at same level as "Documents"
+		booksDir, found := lookForSiblingDir(param.Documents, "Books")
+		if found {
+			// ok found .../Books, save in param
+			param.Books = booksDir
+		}
+
+		if len(param.Books) != 0 {
+			log.Println("init, found books dir :", param.Books)
+		} else {
+			log.Println("init, no books dir found")
+		}
+	}
+}
+
+// checkCameraDir tries to find Camera dir under the DCIM dir
+func checkCameraDir(param *InitParam) {
+	// if Camera dir empty
+	if len(param.Camera) == 0 {
+		// try "Camera" under DCIM
+		cameraDir := filepath.Join(param.DCIM, "Camera")
+		if isDir(cameraDir) {
+			// ok found
+			param.Camera = cameraDir
+		}
+
+		if len(param.Camera) != 0 {
+			log.Println("init, found Camera dir :", param.Camera)
+		} else {
+			log.Println("init, no Camera dir found")
+		}
+	}
+}
+
+func lookForSiblingDir(dir, lookFor string) (foundDir string, found bool) {
+	parentDir := filepath.Dir(dir)
+	siblingDir := filepath.Join(parentDir, lookFor)
+	if isDir(siblingDir) {
+		return siblingDir, true
+	}
+	return "", false
+}
+
+func isDir(dir string) bool {
+	fileinfo, err := os.Stat(dir)
+	if err == nil {
+		if fileinfo.IsDir() {
+			return true
+		}
+	} else if !os.IsNotExist(err) { // ??
+		log.Println(err)
+	}
+	return false
+}
+
+func isFile(filename string) bool {
+	fileinfo, err := os.Stat(filename)
+	if err != nil {
+		if !os.IsNotExist(err) {
+			// other Stat() error
+			log.Printf("Init, error: %v\n", configFilename, err)
+			return false
+		}
+		return false
+	}
+	if fileinfo.Mode()&os.ModeType != 0 {
+		// special or Dir
+		return false
+	}
+	return true
+}
+
 // register a service we provide with mppq
 func registerMppqService(serviceName string) error {
 
@@ -187,7 +254,7 @@ func registerMppqService(serviceName string) error {
 
 	// register a service (mppqProvider must be started)
 	deviceName := config.Devicename
-	if deviceName == "" {
+	if len(deviceName) == 0 {
 		deviceName, _ = os.Hostname() // returns 'localhost' on my Nexus 5/7
 	}
 	err := mppqProvider.AddService(mppq.ServiceDef{
@@ -198,59 +265,4 @@ func registerMppqService(serviceName string) error {
 	})
 
 	return err
-}
-
-// ServeHTTPConfig handles HTTP GET & PUT for our config file
-// GET: curl localhost:1440/androidPush/config -o config.json
-// PUT: curl --upload-file ./config.json http://localhost:1440/androidPush/config
-func ServeHTTPConfig(w http.ResponseWriter, r *http.Request) {
-	log.Println("ServeHTTPConfig", r.Method)
-
-	// GET config file
-	if r.Method == "GET" {
-		log.Println("  GET ", ConfigFilepath)
-		http.ServeFile(w, r, ConfigFilepath)
-		return
-	}
-
-	// PUT: save config file
-	if r.Method == "PUT" {
-		log.Println("  PUT ", ConfigFilepath)
-
-		if saveConfig(w, r) {
-			// re-read config (will that work, outfile is not closed?)
-			config.Load(ConfigFilepath)
-
-			// re-register mppq androidPush (devicename might have changed)
-			registerMppqService(mppqServiceName)
-		}
-
-		return
-	}
-
-	// invalid method
-	log.Println("ServeHTTPConfig, invalid method", r.Method)
-	http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-}
-
-func saveConfig(w http.ResponseWriter, r *http.Request) bool {
-	// open output file
-	outfile, err := os.Create(ConfigFilepath)
-	if err != nil {
-		log.Printf("ServeHTTPConfig, error creating file [%v]: %v\n", ConfigFilepath, err)
-		http.Error(w, "Failed to create file", http.StatusInternalServerError)
-		return false
-	}
-	defer outfile.Close()
-
-	// copy data to output file
-	written, err := io.Copy(outfile, r.Body)
-	if err != nil {
-		log.Printf("ServeHTTPConfig, error copying to file [%v]: %v\n", ConfigFilepath, err)
-		http.Error(w, "Failed to save file", http.StatusInternalServerError)
-		return false
-	}
-
-	log.Printf("ServeHTTPConfig, wrote %v bytes\n", written)
-	return true
 }

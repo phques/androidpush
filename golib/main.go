@@ -1,6 +1,9 @@
 // AndroidPush project
 // Copyright 2015 Philippe Quesnel
 // Licensed under the Academic Free License version 3.0
+
+// this is the main for the libgojni.so
+// it can be ran standalone on the PC too (for debug)
 package main
 
 import (
@@ -42,13 +45,14 @@ func stop() {
 	}
 }
 
-// makeStdaloneParam create a InitParam for use when running standalone
+// makeStdaloneParam creates a InitParam for use when running standalone
 // config file in "files" subdir, all root dirs under home/philippe
 func makeStdaloneParam() *gopush.InitParam {
 	param := &gopush.InitParam{}
 	param.Devicename, _ = os.Hostname()
 	param.AppFilesDir = "files"
-	param.Books = "/home/philippe/Books"
+	//	param.Books = "/home/philippe/Books"
+	//	param.Camera = "/home/philippe/Pictures/Camera"
 	param.DCIM = "/home/philippe/Pictures"
 	param.Documents = "/home/philippe/Documents"
 	param.Downloads = "/home/philippe/Downloads"

@@ -18,8 +18,9 @@ type InitParam struct {
 	AppFilesDir string // app's files dir, we store config file there
 
 	// config file directories, used to populate config file 1st time
-	Books     string
-	DCIM      string // for the Camera
+	Books     string // can be empty, will try as sibling of Documents
+	Camera    string // can be empty, will try under DCIM/Camera
+	DCIM      string
 	Documents string
 	Downloads string
 	Movies    string
