@@ -1,0 +1,25 @@
+# AndroidPush IUP GUI LED file
+
+mainDialog = DIALOG[TITLE="Android Push", MARGINS=5x5]
+(
+	vbox[NMARGIN=5x5, NGAP=5x5](
+
+		hbox[NMARGIN=5x5, NGAP=5x5, SIZE=150](
+			vbox[NGAP=5x5](
+				label("Providers"),
+#				providers = list[DROPDOWN="YES"](NULL)
+				providers = list[EXPAND=HORIZONTAL, VISIBLELINES=3](NULL)
+			),
+			hbox(
+				vbox[NGAP=5x5](
+					queryButton = button("Query", NULL),
+					stopQueryButton = button[ACTIVE="NO"]("Stop Query", NULL)
+				)
+			)
+		),
+		vbox[NGAP=5x5](
+			label("Provider details"),
+			providerDetails = text[EXPAND=HORIZONTAL, MARGIN=5](NULL)
+		)
+	)
+)
