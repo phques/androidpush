@@ -9,12 +9,6 @@ import (
 	"testing"
 )
 
-func TestInitAppFilesDir(t *testing.T) {
-	if err := InitAppFilesDir("files"); err != nil {
-		t.Error(err)
-	}
-}
-
 func TestStopNotStarted(t *testing.T) {
 	//##NB; we did not start the provider
 	if Stop() == nil {
@@ -23,13 +17,20 @@ func TestStopNotStarted(t *testing.T) {
 }
 
 func TestStart(t *testing.T) {
+	// init before start !
+	param := NewInitParam()
+	param.AppFilesDir = "."
+	if err := Init(param); err != nil {
+		t.Error("failed to init:", err)
+	}
+
 	if err := Start(); err != nil {
-		t.Error(err)
+		t.Error("failed to Start:", err)
 	}
 }
 
 func TestStop(t *testing.T) {
 	if err := Stop(); err != nil {
-		t.Error(err)
+		t.Error("failed to Stop:", err)
 	}
 }

@@ -28,18 +28,20 @@ public abstract class GoInterface {
         private static final int FIELD_AppFilesDir_SET = 0x11f;
         private static final int FIELD_Books_GET = 0x20f;
         private static final int FIELD_Books_SET = 0x21f;
-        private static final int FIELD_DCIM_GET = 0x30f;
-        private static final int FIELD_DCIM_SET = 0x31f;
-        private static final int FIELD_Documents_GET = 0x40f;
-        private static final int FIELD_Documents_SET = 0x41f;
-        private static final int FIELD_Downloads_GET = 0x50f;
-        private static final int FIELD_Downloads_SET = 0x51f;
-        private static final int FIELD_Movies_GET = 0x60f;
-        private static final int FIELD_Movies_SET = 0x61f;
-        private static final int FIELD_Music_GET = 0x70f;
-        private static final int FIELD_Music_SET = 0x71f;
-        private static final int FIELD_Pictures_GET = 0x80f;
-        private static final int FIELD_Pictures_SET = 0x81f;
+        private static final int FIELD_Camera_GET = 0x30f;
+        private static final int FIELD_Camera_SET = 0x31f;
+        private static final int FIELD_DCIM_GET = 0x40f;
+        private static final int FIELD_DCIM_SET = 0x41f;
+        private static final int FIELD_Documents_GET = 0x50f;
+        private static final int FIELD_Documents_SET = 0x51f;
+        private static final int FIELD_Downloads_GET = 0x60f;
+        private static final int FIELD_Downloads_SET = 0x61f;
+        private static final int FIELD_Movies_GET = 0x70f;
+        private static final int FIELD_Movies_SET = 0x71f;
+        private static final int FIELD_Music_GET = 0x80f;
+        private static final int FIELD_Music_SET = 0x81f;
+        private static final int FIELD_Pictures_GET = 0x90f;
+        private static final int FIELD_Pictures_SET = 0x91f;
         
         private go.Seq.Ref ref;
         
@@ -95,6 +97,21 @@ public abstract class GoInterface {
             in.writeRef(ref);
             in.writeUTF16(v);
             Seq.send(DESCRIPTOR, FIELD_Books_SET, in, out);
+        }
+        public String getCamera() {
+            Seq in = new Seq();
+            Seq out = new Seq();
+            in.writeRef(ref);
+            Seq.send(DESCRIPTOR, FIELD_Camera_GET, in, out);
+            return out.readUTF16();
+        }
+        
+        public void setCamera(String v) {
+            Seq in = new Seq();
+            Seq out = new Seq();
+            in.writeRef(ref);
+            in.writeUTF16(v);
+            Seq.send(DESCRIPTOR, FIELD_Camera_SET, in, out);
         }
         public String getDCIM() {
             Seq in = new Seq();
@@ -219,6 +236,15 @@ public abstract class GoInterface {
             } else if (!thisBooks.equals(thatBooks)) {
                 return false;
             }
+            String thisCamera = getCamera();
+            String thatCamera = that.getCamera();
+            if (thisCamera == null) {
+                if (thatCamera != null) {
+                    return false;
+                }
+            } else if (!thisCamera.equals(thatCamera)) {
+                return false;
+            }
             String thisDCIM = getDCIM();
             String thatDCIM = that.getDCIM();
             if (thisDCIM == null) {
@@ -277,7 +303,7 @@ public abstract class GoInterface {
         }
         
         @Override public int hashCode() {
-            return java.util.Arrays.hashCode(new Object[] {getDevicename(), getAppFilesDir(), getBooks(), getDCIM(), getDocuments(), getDownloads(), getMovies(), getMusic(), getPictures()});
+            return java.util.Arrays.hashCode(new Object[] {getDevicename(), getAppFilesDir(), getBooks(), getCamera(), getDCIM(), getDocuments(), getDownloads(), getMovies(), getMusic(), getPictures()});
         }
         
         @Override public String toString() {
@@ -286,6 +312,7 @@ public abstract class GoInterface {
             b.append("Devicename:").append(getDevicename()).append(",");
             b.append("AppFilesDir:").append(getAppFilesDir()).append(",");
             b.append("Books:").append(getBooks()).append(",");
+            b.append("Camera:").append(getCamera()).append(",");
             b.append("DCIM:").append(getDCIM()).append(",");
             b.append("Documents:").append(getDocuments()).append(",");
             b.append("Downloads:").append(getDownloads()).append(",");

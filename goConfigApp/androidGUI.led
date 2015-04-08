@@ -4,11 +4,11 @@ mainDialog = DIALOG[TITLE="Android Push", MARGINS=5x5]
 (
 	vbox[NMARGIN=5x5, NGAP=5x5](
 
-		hbox[NMARGIN=5x5, NGAP=5x5, SIZE=150](
+		hbox[NMARGIN=5x5, NGAP=5x5](
 			vbox[NGAP=5x5](
 				label("Providers"),
-#				providers = list[DROPDOWN="YES"](NULL)
-				providers = list[EXPAND=HORIZONTAL, VISIBLELINES=3](NULL)
+				providers = list[EXPAND=HORIZONTAL, SIZE=150,
+							    VISIBLELINES=4, SCROLLBAR=YES, AUTOHIDE=NO](NULL)
 			),
 			hbox(
 				vbox[NGAP=5x5](

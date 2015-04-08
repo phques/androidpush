@@ -3,6 +3,8 @@ package gopush
 import (
 	"os"
 	"testing"
+
+	"github.com/phques/mppq"
 )
 
 func TestCheckBooksDir(t *testing.T) {
@@ -30,4 +32,11 @@ func TestCheckBooksDir(t *testing.T) {
 
 	// delete ./Books
 	os.Remove("./Books")
+}
+
+func TestStartProvider(t *testing.T) {
+	p := 
+	if err := p.Start(); err != nil {
+		t.Error("fasiled to start provider:", err)
+	}
 }

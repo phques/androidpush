@@ -29,18 +29,20 @@ const (
 	proxyInitParamAppFilesDirSetCode = 0x11f
 	proxyInitParamBooksGetCode       = 0x20f
 	proxyInitParamBooksSetCode       = 0x21f
-	proxyInitParamDCIMGetCode        = 0x30f
-	proxyInitParamDCIMSetCode        = 0x31f
-	proxyInitParamDocumentsGetCode   = 0x40f
-	proxyInitParamDocumentsSetCode   = 0x41f
-	proxyInitParamDownloadsGetCode   = 0x50f
-	proxyInitParamDownloadsSetCode   = 0x51f
-	proxyInitParamMoviesGetCode      = 0x60f
-	proxyInitParamMoviesSetCode      = 0x61f
-	proxyInitParamMusicGetCode       = 0x70f
-	proxyInitParamMusicSetCode       = 0x71f
-	proxyInitParamPicturesGetCode    = 0x80f
-	proxyInitParamPicturesSetCode    = 0x81f
+	proxyInitParamCameraGetCode      = 0x30f
+	proxyInitParamCameraSetCode      = 0x31f
+	proxyInitParamDCIMGetCode        = 0x40f
+	proxyInitParamDCIMSetCode        = 0x41f
+	proxyInitParamDocumentsGetCode   = 0x50f
+	proxyInitParamDocumentsSetCode   = 0x51f
+	proxyInitParamDownloadsGetCode   = 0x60f
+	proxyInitParamDownloadsSetCode   = 0x61f
+	proxyInitParamMoviesGetCode      = 0x70f
+	proxyInitParamMoviesSetCode      = 0x71f
+	proxyInitParamMusicGetCode       = 0x80f
+	proxyInitParamMusicSetCode       = 0x81f
+	proxyInitParamPicturesGetCode    = 0x90f
+	proxyInitParamPicturesSetCode    = 0x91f
 )
 
 type proxyInitParam seq.Ref
@@ -78,6 +80,18 @@ func proxyInitParamBooksSet(out, in *seq.Buffer) {
 func proxyInitParamBooksGet(out, in *seq.Buffer) {
 	ref := in.ReadRef()
 	v := ref.Get().(*goInterface.InitParam).Books
+	out.WriteUTF16(v)
+}
+
+func proxyInitParamCameraSet(out, in *seq.Buffer) {
+	ref := in.ReadRef()
+	v := in.ReadUTF16()
+	ref.Get().(*goInterface.InitParam).Camera = v
+}
+
+func proxyInitParamCameraGet(out, in *seq.Buffer) {
+	ref := in.ReadRef()
+	v := ref.Get().(*goInterface.InitParam).Camera
 	out.WriteUTF16(v)
 }
 
@@ -160,6 +174,8 @@ func init() {
 	seq.Register(proxyInitParamDescriptor, proxyInitParamAppFilesDirGetCode, proxyInitParamAppFilesDirGet)
 	seq.Register(proxyInitParamDescriptor, proxyInitParamBooksSetCode, proxyInitParamBooksSet)
 	seq.Register(proxyInitParamDescriptor, proxyInitParamBooksGetCode, proxyInitParamBooksGet)
+	seq.Register(proxyInitParamDescriptor, proxyInitParamCameraSetCode, proxyInitParamCameraSet)
+	seq.Register(proxyInitParamDescriptor, proxyInitParamCameraGetCode, proxyInitParamCameraGet)
 	seq.Register(proxyInitParamDescriptor, proxyInitParamDCIMSetCode, proxyInitParamDCIMSet)
 	seq.Register(proxyInitParamDescriptor, proxyInitParamDCIMGetCode, proxyInitParamDCIMGet)
 	seq.Register(proxyInitParamDescriptor, proxyInitParamDocumentsSetCode, proxyInitParamDocumentsSet)

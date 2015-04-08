@@ -6,6 +6,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import java.io.File;
 
@@ -28,6 +29,12 @@ public class MainActivity extends ActionBarActivity {
             initGoLib();
             GoInterface.Start();
         } catch (Exception e) {
+            // show a 'toast' with the error
+            // (an alert dialog would be nice, but too much code for a simple popup!)
+            Context context = getApplicationContext();
+            Toast toast = Toast.makeText(context, e.getMessage(), Toast.LENGTH_LONG);
+            toast.show();
+
             e.printStackTrace();
         }
     }
