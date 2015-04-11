@@ -1,5 +1,6 @@
 Using Go-QML with Go tip on Windows 64bits,
--> Qt seems to be available only as 32bits
+-> Qt seems to be available only as 32bits  
+(apparently 64bits builds are available, cf [go-qml 64 bits][refGoQml64])
 
 ## Install Go
 
@@ -105,4 +106,5 @@ Note that you need to set the env variables GOARCH as above to build.
 [refTDM]: http://tdm-gcc.tdragon.net/
 [refQt]: http://download.qt.io/official_releases/qt/5.4/5.4.1/qt-opensource-windows-x86-mingw491_opengl-5.4.1.exe
 [refPkgCfgLite]: http://sourceforge.net/projects/pkgconfiglite/files
+[refGoQml64]: https://groups.google.com/forum/#!topic/go-qml/S5Vho-XtQyo
 
