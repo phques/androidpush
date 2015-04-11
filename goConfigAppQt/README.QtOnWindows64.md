@@ -76,11 +76,14 @@ decompress into C:\Qt\Qt5.4.1\Tools\mingw491_32
 check that it is found in PATH: 'pkg-config --version'
 > 0.28
 
+Add a new Windows enviiroment variable : PKG_CONFIG_PATH  
+set it to point to C:\Qt\Qt5.4.1\5.4\mingw491_32\lib\pkgconfig
+
 ----
-### Instal Go-QML
+### Install Go-QML
 
 **Get Go-QML**  
-(make certain you have a proper GOPATH set 1st!)  
+(make certain you have a proper GOPATH set 1st! new command prompt if you just added PKG_CONFIG_PATH)  
 go get -d gopkg.in/qml.v1  
 
 now build it (we need to build in 32bits, since Qt libs are 32bits):  
