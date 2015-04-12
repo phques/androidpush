@@ -19,15 +19,15 @@ ApplicationWindow {
         }
     }
 
-	// Column + anchors
+    // Item container + anchors
     GroupBox {
         id: groupBox1
         anchors.margins: 5
         anchors.fill: parent
         title: qsTr("Found Providers")
 
-        Column {
-            id: columnLayout2
+        Item {
+            id: column1
             anchors.fill: parent
 
             TableView {
