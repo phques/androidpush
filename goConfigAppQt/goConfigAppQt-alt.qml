@@ -18,26 +18,30 @@ ApplicationWindow {
             providersMdl.append(JSON.parse(json))
         }
     }
-	
-	// ColumnLayout
+
+	// Column + anchors
     GroupBox {
         id: groupBox1
         anchors.margins: 5
         anchors.fill: parent
-        title: qsTr("Found Providers ")
+        title: qsTr("Found Providers")
 
-        ColumnLayout {
+        Column {
             id: columnLayout2
-            //anchors.margins: 5
             anchors.fill: parent
-            //spacing: 5
 
             TableView {
                 id: providersView
                 model: providersMdl
 
-                Layout.fillHeight: true
-                Layout.fillWidth: true
+                anchors.right: parent.right
+                anchors.left: parent.left
+                anchors.top: parent.top
+				
+                // anchor bottom of table to queryButton
+                // (which is anchored to bottom of our parent)
+                anchors.bottom: queryButton.top
+                anchors.bottomMargin: 5
 
                 frameVisible: true
                 headerVisible: true
@@ -60,8 +64,8 @@ ApplicationWindow {
                 id: queryButton
                 objectName: "queryButton"
                 text: "Query"
+                anchors.bottom: parent.bottom
             }
         }
     }
-
 }
