@@ -16,6 +16,7 @@ import (
 type WndObjects struct {
 	ProvidersMdl qml.Object `QML:"providersMdl"` // providers list model
 	QueryButton  qml.Object `QML:"queryButton"`
+	MessageBox   qml.Object `QML:"messageDialog"`
 }
 
 // MainWnd is our main window struct
@@ -44,7 +45,7 @@ func main() {
 }
 
 // createMainWnd creates a useable MainWnd
-func createMainWnd() *MainWnd {
+func newMainWnd() *MainWnd {
 	m := &MainWnd{}
 	m.services = make(map[string]*mppq.ServiceDef)
 	return m
@@ -59,7 +60,7 @@ func run() error {
 	}
 
 	// create MainWnd and qml window
-	mainWnd := createMainWnd()
+	mainWnd := newMainWnd()
 	mainWnd.window = component.CreateWindow(nil)
 
 	// fill mainWnd.objs with qml.Object from the window ('controls', etc)
@@ -78,6 +79,15 @@ func run() error {
 	return nil
 }
 
+func (w *MainWnd) msg(title, text string) {
+	/*
+		box := w.objs.MessageBox //.CreateWindow(nil)
+		box.Set("title", title)
+		box.Set("text", text)
+		box.Show()
+		//box.Destroy()*/
+}
+
 // onQueryButtClicked is called when the QueryButton is clicked
 func (w *MainWnd) onQueryButtClicked() {
 	// do we have a query running ?
@@ -91,6 +101,10 @@ func (w *MainWnd) onQueryButtClicked() {
 // startQuery starts a new mppq query for androidpush
 func (w *MainWnd) startQuery() {
 	log.Println("start query")
+
+	//## pq debug
+	w.msg("titre", "textre")
+
 	// create new mppq query for "androidPush"
 	w.mppqQuery = mppq.NewQuery("androidPush", false)
 

@@ -2,6 +2,7 @@ import QtQuick 2.3
 import QtQuick.Controls 1.2
 import QtQuick.Layouts 1.0
 import QtQuick.Window 2.1
+import QtQuick.Dialogs 1.1
 
 ApplicationWindow {
     id: applicationWindow1
@@ -9,6 +10,14 @@ ApplicationWindow {
     width: 375
     height: 250
 
+    MessageDialog {
+        id: messageDialog
+		objectName: "messageDialog"
+        title: "May I have your attention please"
+        text: "It's so cool that you are using Qt Quick."
+        //Component.onCompleted: visible = true
+    }
+    
     ListModel {
         id: providersMdl
         objectName: "providersMdl"
