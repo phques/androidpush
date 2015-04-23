@@ -14,9 +14,9 @@ import (
 // WndObjects holds qml objects / 'controls' from our window
 // gets filled by qmlutil.FetchObjects
 type WndObjects struct {
-	ProvidersMdl qml.Object `QML:"providersMdl"` // providers list model
-	QueryButton  qml.Object `QML:"queryButton"`
-	MessageBox   qml.Object `QML:"messageDialog"`
+	ProvidersMdl  qml.Object `QML:"providersMdl"` // providers list model
+	QueryButton   qml.Object `QML:"queryButton"`
+	MessageDialog qml.Object `QML:"messageDialog"`
 }
 
 // MainWnd is our main window struct
@@ -44,13 +44,32 @@ func main() {
 	}
 }
 
-// createMainWnd creates a useable MainWnd
+// newMainWnd creates a useable MainWnd
 func newMainWnd() *MainWnd {
 	m := &MainWnd{}
 	m.services = make(map[string]*mppq.ServiceDef)
 	return m
 }
 
+// setupGUI creates the main window, fetches QML objects etc
+func (w *MainWnd) setupGUI(component qml.Object) error {
+	w.window = component.CreateWindow(nil)
+
+	// fill w.objs with qml.Object from the window ('controls', etc)
+	err := qmlutil.FetchObjects(&w.objs, w.window.Common)
+	if err != nil {
+		log.Println("failed to get objects from window:", err)
+		return err
+	}
+
+	// hook w.onQueryButtClicked for query button click
+	w.objs.QueryButton.On("clicked", w.onQueryButtClicked)
+
+	//engine.Context().SetVar("mainWnd", w)
+
+	return nil
+
+}
 func run() error {
 	// create new qml engine, load qml file
 	engine := qml.NewEngine()
@@ -59,33 +78,24 @@ func run() error {
 		return err
 	}
 
+	// create MainWnd & GUI
 	// create MainWnd and qml window
 	mainWnd := newMainWnd()
-	mainWnd.window = component.CreateWindow(nil)
-
-	// fill mainWnd.objs with qml.Object from the window ('controls', etc)
-	err = qmlutil.FetchObjects(&mainWnd.objs, mainWnd.window.Common)
-	if err != nil {
-		log.Println("failed to get objects from window:", err)
+	if err := mainWnd.setupGUI(component); err != nil {
 		return err
 	}
-
-	// hook mainWnd.onQueryButtClicked for query button click
-	mainWnd.objs.QueryButton.On("clicked", mainWnd.onQueryButtClicked)
-	//engine.Context().SetVar("mainWnd", mainWnd)
 
 	mainWnd.window.Show()
 	mainWnd.window.Wait()
 	return nil
 }
 
-func (w *MainWnd) msg(title, text string) {
-	/*
-		box := w.objs.MessageBox //.CreateWindow(nil)
-		box.Set("title", title)
-		box.Set("text", text)
-		box.Show()
-		//box.Destroy()*/
+// ShowMsg open a QML MessageDialog with title & text set
+func (w *MainWnd) ShowMsg(title, text string) {
+	box := w.objs.MessageDialog
+	box.Set("title", title)
+	box.Set("text", text)
+	box.Call("open")
 }
 
 // onQueryButtClicked is called when the QueryButton is clicked
@@ -102,16 +112,13 @@ func (w *MainWnd) onQueryButtClicked() {
 func (w *MainWnd) startQuery() {
 	log.Println("start query")
 
-	//## pq debug
-	w.msg("titre", "textre")
-
 	// create new mppq query for "androidPush"
 	w.mppqQuery = mppq.NewQuery("androidPush", false)
 
 	// start it
 	if err := w.mppqQuery.Start(); err != nil {
-		//##TODO popup with error
 		log.Printf("Error starting mppq query:", err)
+		w.ShowMsg("Start Query", "Error :"+err.Error())
 		w.mppqQuery = nil
 	} else {
 		// launch goroutine that reads back found services
@@ -141,27 +148,33 @@ func (w *MainWnd) stopQuery() {
 // loopQuery is a goroutine that receives found services from mppq query
 func (w *MainWnd) loopQuery() {
 	log.Println("loopQuery in")
+
 	defer log.Println("loopQuery out")
 	defer w.waitGroup.Done()
+
+	// loop waiting for received service definitions
 	for {
 		select {
 		case service, ok := <-w.mppqQuery.ServiceCh:
-			if ok {
-				log.Println("got service :", service)
-				// add to set of services and add to UI list if new
-				// use the %v value of service as key
-				serviceStr := fmt.Sprintf("%v", service)
-				if w.services[serviceStr] == nil {
-					// new service, add to map
-					w.services[serviceStr] = service
-					// add to UI list
-					address := fmt.Sprintf("%v:%v", service.RemoteIP, service.HostPort)
-					w.AddProvider(Provider{service.ProviderName, address})
-					//##TODO: how to match entry in UI with entry in map !!?
-				}
-			} else {
+			if !ok {
 				//channel closed, stop
 				return
+			}
+
+			log.Println("got service :", service)
+			// add to set of services and add to UI list if new
+			// use the %v value of service as key
+			serviceStr := fmt.Sprintf("%v", service)
+
+			if w.services[serviceStr] == nil {
+				// new service, add to map
+				w.services[serviceStr] = service
+
+				// add to UI list
+				address := fmt.Sprintf("%v:%v", service.RemoteIP, service.HostPort)
+				w.AddProvider(Provider{service.ProviderName, address})
+
+				//##TODO: how to match entry in UI with entry in map !!?
 			}
 		}
 	}
@@ -169,8 +182,8 @@ func (w *MainWnd) loopQuery() {
 
 // AddProvider adds a new Provider to QML providers list
 func (w *MainWnd) AddProvider(p Provider) {
-	// create json object string, then call providersMdl.myAppend to append to list
 	//##(workaround)
+	// create json object string, then call providersMdl.myAppend to append to list
 	dicStr := fmt.Sprintf(`{"name": "%v", "address": "%v"}`, p.Name, p.Address)
 	w.objs.ProvidersMdl.Call("myAppend", dicStr)
 }
